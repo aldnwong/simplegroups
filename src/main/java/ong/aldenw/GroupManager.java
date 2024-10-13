@@ -25,12 +25,35 @@ public class GroupManager extends PersistentState {
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         nbt.putString("sgCurrentGroup", currentGroup);
-        return null;
+
+        NbtCompound playersNbt = new NbtCompound();
+        players.forEach(((uuid, playerGroupData) -> {
+            NbtCompound playerNbt = new NbtCompound();
+
+            playerNbt.putString("sgCurrentGroup", playerGroupData.GroupName);
+
+            playersNbt.put(uuid.toString(), playerNbt);
+        }));
+
+        playersNbt.put("players", playersNbt);
+
+        return nbt;
     }
 
     public static GroupManager createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         GroupManager state = new GroupManager();
         state.currentGroup = tag.getString("sgCurrentGroup");
+
+        NbtCompound playersNbt = tag.getCompound("players");
+        playersNbt.getKeys().forEach(key -> {
+            PlayerGroupData playerData = new PlayerGroupData();
+
+            playerData.GroupName = playersNbt.getCompound(key).getString("sgCurrentGroup");
+
+            UUID uuid = UUID.fromString(key);
+            state.players.put(uuid, playerData);
+        });
+
         return state;
     }
 
@@ -43,8 +66,6 @@ public class GroupManager extends PersistentState {
 
     public static PlayerGroupData getPlayerState(LivingEntity player) {
         GroupManager serverState = getServerState(player.getWorld().getServer());
-        PlayerGroupData playerState = serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerGroupData());
-
-        return playerState;
+        return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerGroupData());
     }
 }

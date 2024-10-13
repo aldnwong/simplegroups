@@ -22,7 +22,7 @@ public class GroupCommand {
 
         PlayerGroupData playerState = GroupManager.getPlayerState(player);
 
-        String result = playerState.GroupName != null ? playerArg + "is in group " + playerState.GroupName : playerArg + " is not in a group";
+        String result = !playerState.GroupName.isEmpty() ? playerArg + " is in group " + playerState.GroupName : playerArg + " is not in a group";
 
         context.getSource().sendFeedback(() -> Text.literal(result), false);
         return 1;
@@ -30,11 +30,12 @@ public class GroupCommand {
 
     public final static String setCommandName = "set";
     public static int setCommandExecute (CommandContext<ServerCommandSource> context) {
-        String playerArg = StringArgumentType.getString(context, "player");
-        ServerPlayerEntity player = context.getSource().getWorld().getServer().getPlayerManager().getPlayer(playerArg);
+        ServerPlayerEntity player = context.getSource().getPlayer();
 
         PlayerGroupData playerState = GroupManager.getPlayerState(player);
         playerState.GroupName = "hallo";
+
+
 
         context.getSource().sendFeedback(() -> Text.literal("Set group to hallo."), false);
         return 1;

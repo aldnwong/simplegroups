@@ -12,6 +12,7 @@ public class SimpleGroups implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+
 		CommandRegistrationCallback.EVENT.register(CommandHandler::initialize);
 		LOGGER.info("Simple Groups plugin initialized. :3");
 	}

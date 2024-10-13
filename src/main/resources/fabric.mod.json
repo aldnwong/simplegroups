@@ -3,13 +3,13 @@
 	"id": "simple-groups",
 	"version": "${version}",
 	"name": "Simple Groups",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Kind of like the /team command in Minecraft, but with more flexibility.",
 	"authors": [
-		"Me!"
+		"aldnwong"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://aldenw.ong",
+		"sources": "https://github.com/aldnwong/simplegroups"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/simple-groups/icon.png",
@@ -30,12 +30,9 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.16.7",
+		"fabricloader": ">=0.16.5",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }
