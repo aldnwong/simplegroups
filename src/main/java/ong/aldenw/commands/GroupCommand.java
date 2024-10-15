@@ -34,6 +34,11 @@ public class GroupCommand {
 
     public final static String createCommandName = "create";
     public static int createCommandExecute(CommandContext<ServerCommandSource> context) {
+        if (!context.getSource().isExecutedByPlayer()) {
+            context.getSource().sendFeedback(() -> Text.literal("This command is only available to players.").withColor(RgbFormat.fromThree(255, 0, 0)), false);
+            return 1;
+        }
+
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         ServerPlayerEntity player = context.getSource().getPlayer();
 
