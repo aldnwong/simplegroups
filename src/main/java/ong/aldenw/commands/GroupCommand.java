@@ -8,8 +8,10 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import ong.aldenw.GroupManager;
 import ong.aldenw.arguments.PlayerSuggestions;
+import ong.aldenw.data.Group;
 import ong.aldenw.data.PlayerGroupData;
 import ong.aldenw.network.GroupUpdatePayload;
 
@@ -24,26 +26,39 @@ public class GroupCommand {
 
         PlayerGroupData playerState = GroupManager.getPlayerState(player);
 
-        String result = !playerState.GroupName.isEmpty() ? playerArg + " is in group " + playerState.GroupName : playerArg + " is not in a group";
+        String result = !playerState.GroupId.isEmpty() ? playerArg + " is in group " + playerState.GroupId : playerArg + " is not in a group";
 
         context.getSource().sendFeedback(() -> Text.literal(result), false);
         return 1;
     }
 
-    public final static String setCommandName = "set";
-    public static int setCommandExecute (CommandContext<ServerCommandSource> context) {
+    public final static String createCommandName = "create";
+    public static int createCommandExecute(CommandContext<ServerCommandSource> context) {
+        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        PlayerGroupData playerState = GroupManager.getPlayerState(player);
-        playerState.GroupName = "hallo";
+        Group newGroup = new Group();
+        newGroup.name = "hallo";
+        newGroup.prefix = "[HLLO]";
+        newGroup.color = GroupManager.getTextColorFromRGB(0, 255, 155);
+        newGroup.listed = true;
+        newGroup.open = false;
+        newGroup.leader = player.getUuid();
+        newGroup.players.add(player.getUuid());
 
-        GroupUpdatePayload data = new GroupUpdatePayload(playerState.GroupName);
+        String groupId = GroupManager.generateGroupId(context.getSource().getServer());
+        state.groupList.put(groupId, newGroup);
+
+        PlayerGroupData playerState = GroupManager.getPlayerState(player);
+        playerState.GroupId = groupId;
+
+        GroupUpdatePayload data = new GroupUpdatePayload(playerState.GroupId);
 
         context.getSource().getServer().execute(() -> {
             ServerPlayNetworking.send(player, data);
         });
 
-        context.getSource().sendFeedback(() -> Text.literal("Set group to hallo."), false);
+        context.getSource().sendFeedback(() -> Text.literal("Created new dummy group."), false);
         return 1;
     }
 
@@ -56,8 +71,8 @@ public class GroupCommand {
                                 .executes(GroupCommand::getCommandExecute)
                         )
                 )
-                .then(CommandManager.literal(setCommandName)
-                        .executes(GroupCommand::setCommandExecute)
+                .then(CommandManager.literal(createCommandName)
+                        .executes(GroupCommand::createCommandExecute)
                 );
     }
 }
