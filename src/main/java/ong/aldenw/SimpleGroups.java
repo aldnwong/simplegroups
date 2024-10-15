@@ -26,7 +26,7 @@ public class SimpleGroups implements ModInitializer {
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			PlayerData playerState = GroupManager.getPlayerState(handler.getPlayer());
-			SyncPayload data = new SyncPayload(playerState.groupId);
+			SyncPayload data = new SyncPayload(playerState.groupName);
 
 			server.execute(() -> {
 				ServerPlayNetworking.send(handler.getPlayer(), data);

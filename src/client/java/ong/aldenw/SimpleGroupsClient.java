@@ -16,21 +16,21 @@ public class SimpleGroupsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(SyncPayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
-			playerData.groupId = payload.groupId();
+			playerData.groupName = payload.groupName();
 			client.execute(() -> {
-				if (GroupManager.getServerState(context.client().getServer()).groupList.containsKey(payload.groupId())) {
-					int color = GroupManager.getServerState(context.client().getServer()).groupList.get(payload.groupId()).color;
-					client.player.sendMessage(Text.literal("Group sync received: Group " + payload.groupId()).withColor(color));
+				if (GroupManager.getServerState(context.client().getServer()).groupList.containsKey(payload.groupName())) {
+					int color = GroupManager.getServerState(context.client().getServer()).groupList.get(payload.groupName()).color;
+					client.player.sendMessage(Text.literal("Group sync received: Group " + payload.groupName()).withColor(color));
 				}
 			});
 		});
 		ClientPlayNetworking.registerGlobalReceiver(UpdatePayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
-			playerData.groupId = payload.groupId();
+			playerData.groupName = payload.groupName();
 			client.execute(() -> {
-				if (GroupManager.getServerState(context.client().getServer()).groupList.containsKey(payload.groupId())) {
-					int color = GroupManager.getServerState(context.client().getServer()).groupList.get(payload.groupId()).color;
-					client.player.sendMessage(Text.literal("Group sync received: Group " + payload.groupId()).withColor(color));
+				if (GroupManager.getServerState(context.client().getServer()).groupList.containsKey(payload.groupName())) {
+					int color = GroupManager.getServerState(context.client().getServer()).groupList.get(payload.groupName()).color;
+					client.player.sendMessage(Text.literal("Group sync received: Group " + payload.groupName()).withColor(color));
 				}
 			});
 		});

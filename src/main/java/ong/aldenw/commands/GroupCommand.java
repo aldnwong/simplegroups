@@ -26,7 +26,7 @@ public class GroupCommand {
 
         PlayerData playerState = GroupManager.getPlayerState(player);
 
-        String result = !playerState.groupId.isEmpty() ? playerArg + " is in group " + playerState.groupId : playerArg + " is not in a group";
+        String result = !playerState.groupName.isEmpty() ? playerArg + " is in group " + playerState.groupName : playerArg + " is not in a group";
 
         context.getSource().sendFeedback(() -> Text.literal(result), false);
         return 1;
@@ -42,25 +42,29 @@ public class GroupCommand {
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        if (!state.players.get(player.getUuid()).groupId.isEmpty()) {
+        if (!state.players.get(player.getUuid()).groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are already in a group.").withColor(RgbFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
 
         String groupName = StringArgumentType.getString(context, "groupName");
-        String groupId = GroupManager.generateGroupId(context.getSource().getServer());
         GroupData newGroupData = new GroupData();
 
-        newGroupData.name = groupName;
+        if (state.groupList.containsKey(groupName)) {
+            context.getSource().sendFeedback(() -> Text.literal("A group with this name already exists.").withColor(RgbFormat.fromThree(255, 0, 0)), false);
+            return 1;
+        }
+
+        newGroupData.displayName = groupName;
         newGroupData.leader = player.getUuid();
         newGroupData.players.add(player.getUuid());
 
-        state.groupList.put(groupId, newGroupData);
+        state.groupList.put(groupName, newGroupData);
 
         PlayerData playerState = GroupManager.getPlayerState(player);
-        playerState.groupId = groupId;
+        playerState.groupName = groupName;
 
-        UpdatePayload data = new UpdatePayload(playerState.groupId);
+        UpdatePayload data = new UpdatePayload(playerState.groupName);
 
         context.getSource().getServer().execute(() -> {
             ServerPlayNetworking.send(player, data);

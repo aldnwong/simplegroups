@@ -11,7 +11,6 @@ import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 
 import java.util.HashMap;
-import java.util.Random;
 import java.util.UUID;
 
 public class GroupManager extends PersistentState {
@@ -30,7 +29,7 @@ public class GroupManager extends PersistentState {
         groupList.forEach(((id, groupData) -> {
             NbtCompound groupNbt = new NbtCompound();
 
-            groupNbt.putString("name", groupData.name);
+            groupNbt.putString("displayName", groupData.displayName);
             groupNbt.putString("prefix", groupData.prefix);
             groupNbt.putBoolean("listed", groupData.listed);
             groupNbt.putBoolean("open", groupData.open);
@@ -55,7 +54,7 @@ public class GroupManager extends PersistentState {
         players.forEach(((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
 
-            playerNbt.putString("groupId", playerData.groupId);
+            playerNbt.putString("groupId", playerData.groupName);
 
             playersNbt.put(uuid.toString(), playerNbt);
         }));
@@ -72,7 +71,7 @@ public class GroupManager extends PersistentState {
         groupsNbt.getKeys().forEach(key -> {
             GroupData groupData = new GroupData();
 
-            groupData.name = groupsNbt.getCompound(key).getString("name");
+            groupData.displayName = groupsNbt.getCompound(key).getString("displayName");
             groupData.prefix = groupsNbt.getCompound(key).getString("prefix");
             groupData.listed = groupsNbt.getCompound(key).getBoolean("listed");
             groupData.open = groupsNbt.getCompound(key).getBoolean("open");
@@ -96,7 +95,7 @@ public class GroupManager extends PersistentState {
         playersNbt.getKeys().forEach(key -> {
             PlayerData playerData = new PlayerData();
 
-            playerData.groupId = playersNbt.getCompound(key).getString("groupId");
+            playerData.groupName = playersNbt.getCompound(key).getString("groupId");
 
             UUID uuid = UUID.fromString(key);
             state.players.put(uuid, playerData);
@@ -115,20 +114,5 @@ public class GroupManager extends PersistentState {
     public static PlayerData getPlayerState(LivingEntity player) {
         GroupManager serverState = getServerState(player.getWorld().getServer());
         return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
-    }
-
-    public static String generateGroupId(MinecraftServer server) {
-        GroupManager serverState = getServerState(server);
-        while(true) {
-            StringBuilder id = new StringBuilder();
-            for (int i = 0; i < 16; i++) {
-                Random rand = new Random();
-                char randomChar = (char)('A' + rand.nextInt(26));
-
-                id.append(randomChar);
-            }
-            if (!serverState.groupList.containsKey(id.toString()))
-                return id.toString();
-        }
     }
 }
