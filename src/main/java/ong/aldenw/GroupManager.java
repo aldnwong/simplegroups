@@ -55,7 +55,7 @@ public class GroupManager extends PersistentState {
         players.forEach(((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
 
-            playerNbt.putString("groupId", playerData.GroupId);
+            playerNbt.putString("groupId", playerData.groupId);
 
             playersNbt.put(uuid.toString(), playerNbt);
         }));
@@ -96,7 +96,7 @@ public class GroupManager extends PersistentState {
         playersNbt.getKeys().forEach(key -> {
             PlayerData playerData = new PlayerData();
 
-            playerData.GroupId = playersNbt.getCompound(key).getString("groupId");
+            playerData.groupId = playersNbt.getCompound(key).getString("groupId");
 
             UUID uuid = UUID.fromString(key);
             state.players.put(uuid, playerData);
