@@ -1,4 +1,4 @@
-package ong.aldenw.persistentdata;
+package ong.aldenw.data;
 
 public class PlayerGroupData {
     public String GroupName = "";

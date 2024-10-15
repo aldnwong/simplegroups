@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
-import ong.aldenw.persistentdata.PlayerGroupData;
+import ong.aldenw.data.PlayerGroupData;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -24,7 +24,6 @@ public class GroupManager extends PersistentState {
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        nbt.putString("sgCurrentGroup", currentGroup);
 
         NbtCompound playersNbt = new NbtCompound();
         players.forEach(((uuid, playerGroupData) -> {
@@ -35,7 +34,7 @@ public class GroupManager extends PersistentState {
             playersNbt.put(uuid.toString(), playerNbt);
         }));
 
-        playersNbt.put("players", playersNbt);
+        nbt.put("players", playersNbt);
 
         return nbt;
     }
