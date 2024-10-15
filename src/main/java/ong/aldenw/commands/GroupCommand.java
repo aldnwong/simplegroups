@@ -8,11 +8,10 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import ong.aldenw.GroupManager;
 import ong.aldenw.arguments.PlayerSuggestions;
-import ong.aldenw.data.Group;
-import ong.aldenw.data.PlayerGroupData;
+import ong.aldenw.data.GroupData;
+import ong.aldenw.data.PlayerData;
 import ong.aldenw.network.GroupUpdatePayload;
 
 public class GroupCommand {
@@ -24,7 +23,7 @@ public class GroupCommand {
         String playerArg = StringArgumentType.getString(context, "player");
         ServerPlayerEntity player = context.getSource().getWorld().getServer().getPlayerManager().getPlayer(playerArg);
 
-        PlayerGroupData playerState = GroupManager.getPlayerState(player);
+        PlayerData playerState = GroupManager.getPlayerState(player);
 
         String result = !playerState.GroupId.isEmpty() ? playerArg + " is in group " + playerState.GroupId : playerArg + " is not in a group";
 
@@ -37,19 +36,19 @@ public class GroupCommand {
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        Group newGroup = new Group();
-        newGroup.name = "hallo";
-        newGroup.prefix = "[HLLO]";
-        newGroup.color = GroupManager.getTextColorFromRGB(0, 255, 155);
-        newGroup.listed = true;
-        newGroup.open = false;
-        newGroup.leader = player.getUuid();
-        newGroup.players.add(player.getUuid());
+        GroupData newGroupData = new GroupData();
+        newGroupData.name = "hallo";
+        newGroupData.prefix = "[HLLO]";
+        newGroupData.color = GroupManager.getTextColorFromRGB(0, 255, 155);
+        newGroupData.listed = true;
+        newGroupData.open = false;
+        newGroupData.leader = player.getUuid();
+        newGroupData.players.add(player.getUuid());
 
         String groupId = GroupManager.generateGroupId(context.getSource().getServer());
-        state.groupList.put(groupId, newGroup);
+        state.groupList.put(groupId, newGroupData);
 
-        PlayerGroupData playerState = GroupManager.getPlayerState(player);
+        PlayerData playerState = GroupManager.getPlayerState(player);
         playerState.GroupId = groupId;
 
         GroupUpdatePayload data = new GroupUpdatePayload(playerState.GroupId);

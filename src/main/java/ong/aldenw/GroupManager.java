@@ -4,21 +4,19 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
-import ong.aldenw.data.Group;
-import ong.aldenw.data.PlayerGroupData;
+import ong.aldenw.data.GroupData;
+import ong.aldenw.data.PlayerData;
 
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
 public class GroupManager extends PersistentState {
-    public HashMap<String, Group> groupList = new HashMap<>();
-    public HashMap<UUID, PlayerGroupData> players = new HashMap<>();
+    public HashMap<String, GroupData> groupList = new HashMap<>();
+    public HashMap<UUID, PlayerData> players = new HashMap<>();
 
     private static final Type<GroupManager> type = new Type<>(
             GroupManager::new,
@@ -29,18 +27,18 @@ public class GroupManager extends PersistentState {
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound groupsNbt = new NbtCompound();
-        groupList.forEach(((id, group) -> {
+        groupList.forEach(((id, groupData) -> {
             NbtCompound groupNbt = new NbtCompound();
 
-            groupNbt.putString("name", group.name);
-            groupNbt.putString("prefix", group.prefix);
-            groupNbt.putBoolean("listed", group.listed);
-            groupNbt.putBoolean("open", group.open);
-            groupNbt.putInt("color", group.color);
+            groupNbt.putString("name", groupData.name);
+            groupNbt.putString("prefix", groupData.prefix);
+            groupNbt.putBoolean("listed", groupData.listed);
+            groupNbt.putBoolean("open", groupData.open);
+            groupNbt.putInt("color", groupData.color);
 
             NbtCompound groupPlayersNbt = new NbtCompound();
-            group.players.forEach((uuid -> {
-                if (group.leader == uuid)
+            groupData.players.forEach((uuid -> {
+                if (groupData.leader == uuid)
                     groupPlayersNbt.putString(uuid.toString(), "LEADER");
                 else
                     groupPlayersNbt.putString(uuid.toString(), "MEMBER");
@@ -54,10 +52,10 @@ public class GroupManager extends PersistentState {
         nbt.put("groups", groupsNbt);
 
         NbtCompound playersNbt = new NbtCompound();
-        players.forEach(((uuid, playerGroupData) -> {
+        players.forEach(((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
 
-            playerNbt.putString("groupId", playerGroupData.GroupId);
+            playerNbt.putString("groupId", playerData.GroupId);
 
             playersNbt.put(uuid.toString(), playerNbt);
         }));
@@ -72,31 +70,31 @@ public class GroupManager extends PersistentState {
 
         NbtCompound groupsNbt = tag.getCompound("groups");
         groupsNbt.getKeys().forEach(key -> {
-            Group group = new Group();
+            GroupData groupData = new GroupData();
 
-            group.name = groupsNbt.getCompound(key).getString("name");
-            group.prefix = groupsNbt.getCompound(key).getString("prefix");
-            group.listed = groupsNbt.getCompound(key).getBoolean("listed");
-            group.open = groupsNbt.getCompound(key).getBoolean("open");
-            group.color = groupsNbt.getCompound(key).getInt("color");
+            groupData.name = groupsNbt.getCompound(key).getString("name");
+            groupData.prefix = groupsNbt.getCompound(key).getString("prefix");
+            groupData.listed = groupsNbt.getCompound(key).getBoolean("listed");
+            groupData.open = groupsNbt.getCompound(key).getBoolean("open");
+            groupData.color = groupsNbt.getCompound(key).getInt("color");
 
             NbtCompound groupPlayersNbt = groupsNbt.getCompound("players");
             groupPlayersNbt.getKeys().forEach(playerKey -> {
                 UUID playerUUID = UUID.fromString(groupPlayersNbt.getString(playerKey));
                 if (groupPlayersNbt.getString(playerKey).equals("LEADER")) {
-                    group.leader = playerUUID;
-                    group.players.add(playerUUID);
+                    groupData.leader = playerUUID;
+                    groupData.players.add(playerUUID);
                 } else {
-                    group.players.add(playerUUID);
+                    groupData.players.add(playerUUID);
                 }
             });
 
-            state.groupList.put(key, group);
+            state.groupList.put(key, groupData);
         });
 
         NbtCompound playersNbt = tag.getCompound("players");
         playersNbt.getKeys().forEach(key -> {
-            PlayerGroupData playerData = new PlayerGroupData();
+            PlayerData playerData = new PlayerData();
 
             playerData.GroupId = playersNbt.getCompound(key).getString("groupId");
 
@@ -114,9 +112,9 @@ public class GroupManager extends PersistentState {
         return state;
     }
 
-    public static PlayerGroupData getPlayerState(LivingEntity player) {
+    public static PlayerData getPlayerState(LivingEntity player) {
         GroupManager serverState = getServerState(player.getWorld().getServer());
-        return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerGroupData());
+        return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
     }
 
     public static String generateGroupId(MinecraftServer server) {

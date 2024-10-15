@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.util.Identifier;
-import ong.aldenw.data.PlayerGroupData;
+import ong.aldenw.data.PlayerData;
 import ong.aldenw.network.GroupUpdatePayload;
 import ong.aldenw.network.GroupSyncPayload;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class SimpleGroups implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(GroupUpdatePayload.ID, GroupUpdatePayload.CODEC);
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			PlayerGroupData playerState = GroupManager.getPlayerState(handler.getPlayer());
+			PlayerData playerState = GroupManager.getPlayerState(handler.getPlayer());
 			GroupSyncPayload data = new GroupSyncPayload(playerState.GroupId);
 
 			server.execute(() -> {

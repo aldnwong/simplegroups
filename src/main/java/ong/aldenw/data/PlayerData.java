@@ -1,5 +1,5 @@
 package ong.aldenw.data;
 
-public class PlayerGroupData {
+public class PlayerData {
     public String GroupId = "";
 }
