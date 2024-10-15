@@ -7,9 +7,9 @@ import net.minecraft.network.packet.CustomPayload;
 
 import static ong.aldenw.SimpleGroups.INITIAL_SYNC;
 
-public record GroupSyncPayload(String groupId) implements CustomPayload {
-    public static final Id<GroupSyncPayload> ID = new Id<>(INITIAL_SYNC);
-    public static final PacketCodec<RegistryByteBuf, GroupSyncPayload> CODEC = PacketCodec.tuple(PacketCodecs.STRING, GroupSyncPayload::groupId, GroupSyncPayload::new);
+public record SyncPayload(String groupId) implements CustomPayload {
+    public static final Id<SyncPayload> ID = new Id<>(INITIAL_SYNC);
+    public static final PacketCodec<RegistryByteBuf, SyncPayload> CODEC = PacketCodec.tuple(PacketCodecs.STRING, SyncPayload::groupId, SyncPayload::new);
 
     @Override
     public Id<? extends CustomPayload> getId() {

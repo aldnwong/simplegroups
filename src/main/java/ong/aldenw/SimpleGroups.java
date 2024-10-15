@@ -8,8 +8,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.util.Identifier;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.GroupUpdatePayload;
-import ong.aldenw.network.GroupSyncPayload;
+import ong.aldenw.network.UpdatePayload;
+import ong.aldenw.network.SyncPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,19 +21,19 @@ public class SimpleGroups implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		PayloadTypeRegistry.playS2C().register(GroupSyncPayload.ID, GroupSyncPayload.CODEC);
-		PayloadTypeRegistry.playS2C().register(GroupUpdatePayload.ID, GroupUpdatePayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(SyncPayload.ID, SyncPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(UpdatePayload.ID, UpdatePayload.CODEC);
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			PlayerData playerState = GroupManager.getPlayerState(handler.getPlayer());
-			GroupSyncPayload data = new GroupSyncPayload(playerState.GroupId);
+			SyncPayload data = new SyncPayload(playerState.GroupId);
 
 			server.execute(() -> {
 				ServerPlayNetworking.send(handler.getPlayer(), data);
 			});
 		});
 
-		CommandRegistrationCallback.EVENT.register(CommandHandler::initialize);
+		CommandRegistrationCallback.EVENT.register(CommandManager::initialize);
 		LOGGER.info("Simple Groups plugin initialized. :3");
 	}
 }

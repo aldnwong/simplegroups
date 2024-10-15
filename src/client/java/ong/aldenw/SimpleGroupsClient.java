@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.GroupSyncPayload;
-import ong.aldenw.network.GroupUpdatePayload;
+import ong.aldenw.network.SyncPayload;
+import ong.aldenw.network.UpdatePayload;
 
 public class SimpleGroupsClient implements ClientModInitializer {
 
@@ -14,7 +14,7 @@ public class SimpleGroupsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ClientPlayNetworking.registerGlobalReceiver(GroupSyncPayload.ID, (payload, context) -> {
+		ClientPlayNetworking.registerGlobalReceiver(SyncPayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
 			playerData.GroupId = payload.groupId();
 			client.execute(() -> {
@@ -24,7 +24,7 @@ public class SimpleGroupsClient implements ClientModInitializer {
 				}
 			});
 		});
-		ClientPlayNetworking.registerGlobalReceiver(GroupUpdatePayload.ID, (payload, context) -> {
+		ClientPlayNetworking.registerGlobalReceiver(UpdatePayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
 			playerData.GroupId = payload.groupId();
 			client.execute(() -> {

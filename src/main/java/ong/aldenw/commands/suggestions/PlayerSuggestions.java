@@ -1,4 +1,4 @@
-package ong.aldenw.arguments;
+package ong.aldenw.commands.suggestions;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

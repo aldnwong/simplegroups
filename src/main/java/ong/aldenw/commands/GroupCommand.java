@@ -9,10 +9,10 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
-import ong.aldenw.arguments.PlayerSuggestions;
+import ong.aldenw.commands.suggestions.PlayerSuggestions;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.GroupUpdatePayload;
+import ong.aldenw.network.UpdatePayload;
 
 public class GroupCommand {
     public final static String commandName = "group";
@@ -51,7 +51,7 @@ public class GroupCommand {
         PlayerData playerState = GroupManager.getPlayerState(player);
         playerState.GroupId = groupId;
 
-        GroupUpdatePayload data = new GroupUpdatePayload(playerState.GroupId);
+        UpdatePayload data = new UpdatePayload(playerState.GroupId);
 
         context.getSource().getServer().execute(() -> {
             ServerPlayNetworking.send(player, data);
