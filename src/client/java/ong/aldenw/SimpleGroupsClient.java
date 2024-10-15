@@ -16,7 +16,7 @@ public class SimpleGroupsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(SyncPayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
-			playerData.GroupId = payload.groupId();
+			playerData.groupId = payload.groupId();
 			client.execute(() -> {
 				if (GroupManager.getServerState(context.client().getServer()).groupList.containsKey(payload.groupId())) {
 					int color = GroupManager.getServerState(context.client().getServer()).groupList.get(payload.groupId()).color;
@@ -26,7 +26,7 @@ public class SimpleGroupsClient implements ClientModInitializer {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(UpdatePayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
-			playerData.GroupId = payload.groupId();
+			playerData.groupId = payload.groupId();
 			client.execute(() -> {
 				if (GroupManager.getServerState(context.client().getServer()).groupList.containsKey(payload.groupId())) {
 					int color = GroupManager.getServerState(context.client().getServer()).groupList.get(payload.groupId()).color;
