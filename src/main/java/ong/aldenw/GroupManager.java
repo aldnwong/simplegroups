@@ -131,11 +131,4 @@ public class GroupManager extends PersistentState {
                 return id.toString();
         }
     }
-
-    public static int getTextColorFromRGB(int red, int green, int blue) {
-        int rgb = red;
-        rgb = (rgb << 8) + green;
-        rgb = (rgb << 8) + blue;
-        return rgb;
-    }
 }
