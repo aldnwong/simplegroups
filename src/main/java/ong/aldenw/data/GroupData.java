@@ -7,8 +7,8 @@ import java.util.UUID;
 
 public class GroupData {
     public String displayName = "";
-    public String prefix = "";
-    public int color = RgbFormat.fromThree(255, 255, 255);
+    public String prefix = "[YUP] ";
+    public int color = RgbFormat.fromThree(0, 255, 155);
     public boolean listed = false;
     public boolean open = false;
     public UUID leader;

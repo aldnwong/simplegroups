@@ -1,3 +1,12 @@
 {
-
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ong.aldenw.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "DisplayNameMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

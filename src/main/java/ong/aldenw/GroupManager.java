@@ -16,6 +16,7 @@ import java.util.UUID;
 public class GroupManager extends PersistentState {
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
+    public HashMap<String, UUID> playerUuidCache = new HashMap<>();
 
     private static final Type<GroupManager> type = new Type<>(
             GroupManager::new,
@@ -42,7 +43,6 @@ public class GroupManager extends PersistentState {
                 else
                     groupPlayersNbt.putString(uuid.toString(), "MEMBER");
             }));
-
             groupNbt.put("players", groupPlayersNbt);
 
             groupsNbt.put(id, groupNbt);
@@ -53,13 +53,18 @@ public class GroupManager extends PersistentState {
         NbtCompound playersNbt = new NbtCompound();
         players.forEach(((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
-
             playerNbt.putString("groupId", playerData.groupName);
-
             playersNbt.put(uuid.toString(), playerNbt);
         }));
 
         nbt.put("players", playersNbt);
+
+        NbtCompound playerUuidCacheNbt = new NbtCompound();
+        playerUuidCache.forEach(((username, uuid) -> {
+            playerUuidCacheNbt.putString(username, uuid.toString());
+        }));
+
+        nbt.put("playerUuidCache", playerUuidCacheNbt);
 
         return nbt;
     }
@@ -101,6 +106,11 @@ public class GroupManager extends PersistentState {
             state.players.put(uuid, playerData);
         });
 
+        NbtCompound playerUuidCacheNbt = tag.getCompound("playerUuidCache");
+        playerUuidCacheNbt.getKeys().forEach(key -> {
+            state.playerUuidCache.put(key, UUID.fromString(playerUuidCacheNbt.getString(key)));
+        });
+
         return state;
     }
 
@@ -114,5 +124,10 @@ public class GroupManager extends PersistentState {
     public static PlayerData getPlayerState(LivingEntity player) {
         GroupManager serverState = getServerState(player.getWorld().getServer());
         return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
+    }
+
+    public static PlayerData getPlayerState(UUID playerUuid, MinecraftServer server) {
+        GroupManager serverState = getServerState(server);
+        return serverState.players.computeIfAbsent(playerUuid, uuid -> new PlayerData());
     }
 }
