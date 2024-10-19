@@ -1,4 +1,4 @@
-package ong.aldenw.commands.subcommands;
+package ong.aldenw.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.PlayerData;
 
-public class GroupGetCommand {
+public class GroupOfCommand {
     public static int execute(CommandContext<ServerCommandSource> context) {
         String playerArg = StringArgumentType.getString(context, "player");
         ServerPlayerEntity player = context.getSource().getWorld().getServer().getPlayerManager().getPlayer(playerArg);

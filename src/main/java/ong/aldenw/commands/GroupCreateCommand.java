@@ -1,4 +1,4 @@
-package ong.aldenw.commands.subcommands;
+package ong.aldenw.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;

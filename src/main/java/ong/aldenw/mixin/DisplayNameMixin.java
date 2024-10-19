@@ -25,7 +25,7 @@ public abstract class DisplayNameMixin {
     private MutableText injected(MutableText mutableText) {
         PlayerEntity player = (PlayerEntity)(Object)this;
         GroupManager state = GroupManager.getServerState(Objects.requireNonNull(player.getServer()));
-        String groupName = GroupManager.getPlayerState(player.getUuid(), player.getServer()).groupName;
+        String groupName = GroupManager.getPlayerState(player).groupName;
         if(groupName.isEmpty()) {
             return Text.empty().append(this.getName());
         } else {

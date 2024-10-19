@@ -6,6 +6,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.server.command.ServerCommandSource;
+import ong.aldenw.GroupManager;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -21,6 +22,12 @@ public class PlayerSuggestions implements SuggestionProvider<ServerCommandSource
         for (String playerName : playerNames) {
             builder.suggest(playerName);
         }
+
+        GroupManager.getServerState(source.getServer()).playerUuidCache.forEach((username, uuid) -> {
+            if (!playerNames.contains(username)) {
+                builder.suggest(username);
+            }
+        });
 
         return builder.buildFuture();
     }

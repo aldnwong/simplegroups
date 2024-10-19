@@ -18,6 +18,7 @@ public class RgbFormat {
     public static final int YELLOW = 16777045;
     public static final int WHITE = 16777215;
 
+
     public static int fromThree(int r, int g, int b) {
         return (((r << 8) + g) << 8) + b;
     }

@@ -123,6 +123,10 @@ public class GroupManager extends PersistentState {
 
     public static PlayerData getPlayerState(LivingEntity player) {
         GroupManager serverState = getServerState(player.getWorld().getServer());
+        String playerName = player.getName().getString();
+        if (!serverState.playerUuidCache.containsKey(playerName) || !serverState.playerUuidCache.get(playerName).equals(player.getUuid())) {
+            serverState.playerUuidCache.put(playerName, player.getUuid());
+        }
         return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
     }
 
