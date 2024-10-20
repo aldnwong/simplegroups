@@ -3,7 +3,7 @@
 	"package": "ong.aldenw.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+		"ClientDisplayNameMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
