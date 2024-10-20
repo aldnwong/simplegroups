@@ -1,5 +1,6 @@
 package ong.aldenw.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.CommandManager;
@@ -22,6 +23,30 @@ public class GroupCommand {
                 .then(CommandManager.literal("create")
                         .then(CommandManager.argument("groupName", StringArgumentType.string())
                                 .executes(GroupCreateCommand::execute))
+                )
+                .then(CommandManager.literal("config")
+                        /*.then(CommandManager.literal("name")
+                                .then(CommandManager.argument("name", StringArgumentType.string())
+                                        .executes(GroupCreateCommand::execute))
+                        )
+                        .then(CommandManager.literal("prefix")
+                                .then(CommandManager.argument("prefix", StringArgumentType.string())
+                                        .executes(GroupCreateCommand::execute))
+                        )*/
+                        .then(CommandManager.literal("color")
+                                .then(CommandManager.argument("r", IntegerArgumentType.integer())
+                                        .then(CommandManager.argument("g", IntegerArgumentType.integer())
+                                                .then(CommandManager.argument("b", IntegerArgumentType.integer())
+                                                        .executes(GroupConfigCommand::colorExecute)
+                                                )
+                                        )
+                                )
+                        )
+                        /*.then(CommandManager.literal("visibility")
+                                .then(CommandManager.argument("groupName", StringArgumentType.string())
+                                        .executes(GroupCreateCommand::execute))
+                        )*/
                 );
+
     }
 }

@@ -8,7 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.util.RgbFormat;
+import ong.aldenw.formats.RgbFormat;
 
 import java.util.Objects;
 
@@ -25,7 +25,6 @@ public class GroupOfCommand {
         }
 
         PlayerData playerState = (Objects.nonNull(player)) ? GroupManager.getPlayerState(player) : GroupManager.getPlayerState(serverState.playerUuidCache.get(playerArg), server);
-
         String result = !playerState.groupName.isEmpty() ? playerArg + " is in group " + playerState.groupName : playerArg + " is not in a group";
 
         context.getSource().sendFeedback(() -> Text.literal(result), false);
