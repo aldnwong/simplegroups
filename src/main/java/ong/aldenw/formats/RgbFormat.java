@@ -1,4 +1,4 @@
-package ong.aldenw.util;
+package ong.aldenw.formats;
 
 public class RgbFormat {
     public static final int BLACK = 0;
