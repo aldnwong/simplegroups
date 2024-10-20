@@ -1,6 +1,6 @@
 package ong.aldenw.data;
 
-import ong.aldenw.util.RgbFormat;
+import ong.aldenw.formats.RgbFormat;
 
 import java.util.ArrayList;
 import java.util.UUID;
