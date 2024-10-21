@@ -14,13 +14,10 @@ import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbFormat;
 import ong.aldenw.network.UpdateDisplayNamePayload;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
-            context.getSource().sendFeedback(() -> Text.literal("This command is only available to players.").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("This command is only available to players").withColor(RgbFormat.DARK_RED), false);
             return false;
         }
 
@@ -29,11 +26,11 @@ public class GroupConfigCommand {
         PlayerData playerState = GroupManager.getPlayerState(player);
         GroupData groupState = state.groupList.get(playerState.groupName);
         if (playerState.groupName.isEmpty()) {
-            context.getSource().sendFeedback(() -> Text.literal("You are not in a group.").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("You are not in a group").withColor(RgbFormat.DARK_RED), false);
             return false;
         }
         if (!player.getUuid().equals(groupState.leader)) {
-            context.getSource().sendFeedback(() -> Text.literal("You do not have permission to edit this group.").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("You do not have permission to edit this group").withColor(RgbFormat.DARK_RED), false);
             return false;
         }
         return true;
@@ -67,15 +64,15 @@ public class GroupConfigCommand {
         String oldName = playerState.groupName;
 
         if (newName.equals(oldName)) {
-            context.getSource().sendFeedback(() -> Text.literal(".").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("Your group already has that name").withColor(RgbFormat.YELLOW), false);
             return 1;
         }
         if (state.groupList.containsKey(newName)) {
-            context.getSource().sendFeedback(() -> Text.literal("A group with this name exists already.").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("A group with this name exists already").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
         if (newName.length() > state.MAX_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
 
@@ -114,7 +111,7 @@ public class GroupConfigCommand {
             if (oldPrefix.isEmpty())
                 context.getSource().sendFeedback(() -> Text.literal("Your group's prefix is already empty").withColor(RgbFormat.YELLOW), false);
             else
-                context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Your group's prefix is already ").withColor(RgbFormat.YELLOW)).append(Text.literal(oldPrefix).withColor(groupState.color)), false);
+                context.getSource().sendFeedback(() -> Text.literal("Your group already has that prefix").withColor(RgbFormat.YELLOW), false);
             return 1;
         }
         if (newPrefix.length() > state.MAX_PREFIX_NAME_LENGTH) {
@@ -172,11 +169,11 @@ public class GroupConfigCommand {
 
 
         if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-            context.getSource().sendFeedback(() -> Text.literal("Invalid color. Values must be from 0-255.").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("Invalid color. Values must be from 0-255").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
         if (groupState.color == RgbFormat.fromThree(r, g, b)) {
-            context.getSource().sendFeedback(() -> Text.literal("Group already has this color.").withColor(RgbFormat.YELLOW), false);
+            context.getSource().sendFeedback(() -> Text.literal("Your group already has this color").withColor(RgbFormat.YELLOW), false);
             return 1;
         }
 
@@ -193,6 +190,55 @@ public class GroupConfigCommand {
 
         updateClientDisplayNames(context.getSource().getServer(), groupState);
 
+        return 1;
+    }
+
+    public static int joinOptionExecute(CommandContext<ServerCommandSource> context) {
+        if (!checkExecuteRequirements(context)) {
+            return 1;
+        }
+
+        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        PlayerEntity player = context.getSource().getPlayer();
+        PlayerData playerState = GroupManager.getPlayerState(player);
+        GroupData groupState = state.groupList.get(playerState.groupName);
+        String option = StringArgumentType.getString(context, "joinOption");
+
+        switch (option) {
+            case "byInviteOnly":
+                if (!groupState.listed && !groupState.open) {
+                    context.getSource().sendFeedback(() -> Text.literal("Your group is already set to invite only").withColor(RgbFormat.YELLOW), false);
+                }
+                else {
+                    groupState.listed = false;
+                    groupState.open = false;
+                    context.getSource().sendFeedback(() -> Text.literal("Your group is now invite only").withColor(RgbFormat.GOLD), false);
+                }
+                break;
+            case "anyoneCanRequest":
+                if (groupState.listed && !groupState.open) {
+                    context.getSource().sendFeedback(() -> Text.literal("Your group is already set to request and invite only").withColor(RgbFormat.YELLOW), false);
+                }
+                else {
+                    groupState.listed = true;
+                    groupState.open = false;
+                    context.getSource().sendFeedback(() -> Text.literal("Your group is now request and invite only").withColor(RgbFormat.GOLD), false);
+                }
+                break;
+            case "anyoneCanJoin":
+                if (groupState.listed && groupState.open) {
+                    context.getSource().sendFeedback(() -> Text.literal("Your group is already publicly joinable").withColor(RgbFormat.YELLOW), false);
+                }
+                else {
+                    groupState.listed = true;
+                    groupState.open = true;
+                    context.getSource().sendFeedback(() -> Text.literal("Your group is now publicly joinable").withColor(RgbFormat.GOLD), false);
+                }
+                break;
+            default:
+                context.getSource().sendFeedback(() -> Text.literal("Invalid option").withColor(RgbFormat.DARK_RED), false);
+                break;
+        }
         return 1;
     }
 }
