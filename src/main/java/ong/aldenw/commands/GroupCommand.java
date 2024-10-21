@@ -29,10 +29,10 @@ public class GroupCommand {
                                 .then(CommandManager.argument("name", StringArgumentType.string())
                                         .executes(GroupConfigCommand::nameExecute))
                         )
-                        /*.then(CommandManager.literal("prefix")
+                        .then(CommandManager.literal("prefix")
                                 .then(CommandManager.argument("prefix", StringArgumentType.string())
                                         .executes(GroupCreateCommand::execute))
-                        )*/
+                        )
                         .then(CommandManager.literal("color")
                                 .then(CommandManager.argument("r", IntegerArgumentType.integer())
                                         .then(CommandManager.argument("g", IntegerArgumentType.integer())

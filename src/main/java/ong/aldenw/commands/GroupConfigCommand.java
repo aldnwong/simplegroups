@@ -1,19 +1,20 @@
 package ong.aldenw.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbFormat;
 import ong.aldenw.network.UpdateDisplayNamePayload;
+
+import static ong.aldenw.GroupManager.MAX_GROUP_NAME_LENGTH;
 
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
@@ -61,8 +62,37 @@ public class GroupConfigCommand {
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerState = GroupManager.getPlayerState(player);
         GroupData groupState = state.groupList.get(playerState.groupName);
+        String newName = StringArgumentType.getString(context, "name");
+        String oldName = playerState.groupName;
 
+        if (newName.equals(oldName)) {
+            context.getSource().sendFeedback(() -> Text.literal(".").withColor(RgbFormat.DARK_RED), false);
+            return 1;
+        }
+        if (state.groupList.containsKey(newName)) {
+            context.getSource().sendFeedback(() -> Text.literal("A group with this name exists already.").withColor(RgbFormat.DARK_RED), false);
+            return 1;
+        }
+        if (newName.length() > MAX_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
+            return 1;
+        }
 
+        state.groupList.put(newName, groupState);
+        state.groupList.remove(oldName);
+        groupState.players.forEach(uuid -> {
+            state.players.get(uuid).groupName = newName;
+        });
+
+        context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed ").withColor(RgbFormat.GOLD)).append(Text.literal(oldName).withColor(groupState.color)).append(Text.literal("'s name to ").withColor(RgbFormat.GOLD)).append(Text.literal(newName).withColor(groupState.color)), false);
+
+        groupState.players.forEach(uuid -> {
+            context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
+                if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
+                    serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's name changed from ").withColor(RgbFormat.GOLD)).append(Text.literal(oldName).withColor(groupState.color)).append(Text.literal(" to ").withColor(RgbFormat.GOLD)).append(Text.literal(newName).withColor(groupState.color)));
+                }
+            });
+        });
         
         return 1;
     }

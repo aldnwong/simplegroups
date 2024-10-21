@@ -2,15 +2,15 @@ package ong.aldenw.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.UpdateDisplayNamePayload;
 import ong.aldenw.formats.RgbFormat;
+
+import static ong.aldenw.GroupManager.MAX_GROUP_NAME_LENGTH;
 
 public class GroupCreateCommand {
     public static int execute(CommandContext<ServerCommandSource> context) {
@@ -30,6 +30,10 @@ public class GroupCreateCommand {
         }
         if (state.groupList.containsKey(groupName)) {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name already exists.").withColor(RgbFormat.fromThree(255, 0, 0)), false);
+            return 1;
+        }
+        if (groupName.length() > MAX_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
 

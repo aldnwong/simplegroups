@@ -9,12 +9,16 @@ import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
+import ong.aldenw.formats.PrefixFormat;
 
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
 public class GroupManager extends PersistentState {
+    public static int MAX_GROUP_NAME_LENGTH = 20;
+    public static PrefixFormat PREFIX_FORMATTING = null;
+
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
     public HashMap<String, UUID> playerUuidCache = new HashMap<>();
