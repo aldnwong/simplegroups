@@ -1,5 +1,6 @@
 package ong.aldenw.data;
 
+import net.minecraft.text.Text;
 import ong.aldenw.formats.RgbFormat;
 
 import java.util.ArrayList;
@@ -13,4 +14,5 @@ public class GroupData {
     public boolean open = false;
     public UUID leader;
     public ArrayList<UUID> players = new ArrayList<>();
+    public ArrayList<UUID> requests = new ArrayList<>();
 }

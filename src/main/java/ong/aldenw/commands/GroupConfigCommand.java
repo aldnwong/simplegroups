@@ -3,16 +3,15 @@ package ong.aldenw.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbFormat;
-import ong.aldenw.network.UpdateDisplayNamePayload;
 
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
@@ -34,21 +33,6 @@ public class GroupConfigCommand {
             return false;
         }
         return true;
-    }
-
-    public static void updateClientDisplayNames(MinecraftServer server, GroupData groupData) {
-        server.getPlayerManager().getPlayerList().forEach(player -> {
-            String prefix = groupData.prefix;
-            int color = groupData.color;
-
-            groupData.players.forEach(uuid -> {
-                UpdateDisplayNamePayload data = new UpdateDisplayNamePayload(uuid.toString(), prefix, color);
-
-                server.execute(() -> {
-                    ServerPlayNetworking.send(player, data);
-                });
-            });
-        });
     }
 
     public static int nameExecute(CommandContext<ServerCommandSource> context) {
@@ -147,7 +131,7 @@ public class GroupConfigCommand {
             });
         }
 
-        updateClientDisplayNames(context.getSource().getServer(), groupState);
+        GroupManager.updateClientDisplayNames(context.getSource().getServer(), groupState);
 
         return 1;
     }
@@ -188,7 +172,7 @@ public class GroupConfigCommand {
             });
         });
 
-        updateClientDisplayNames(context.getSource().getServer(), groupState);
+        GroupManager.updateClientDisplayNames(context.getSource().getServer(), groupState);
 
         return 1;
     }
@@ -233,6 +217,15 @@ public class GroupConfigCommand {
                     groupState.listed = true;
                     groupState.open = true;
                     context.getSource().sendFeedback(() -> Text.literal("Your group is now publicly joinable").withColor(RgbFormat.GOLD), false);
+                    if (!groupState.requests.isEmpty()) {
+                        if (groupState.requests.size() == 1)
+                            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("There is 1 request to join the group.").withColor(RgbFormat.GRAY)).append(Text.literal("Would you like to add these players to the group?").withColor(RgbFormat.GOLD)), false);
+                        else
+                            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("There are " + groupState.requests.size() + " requests to join the group.").withColor(RgbFormat.GRAY)).append(Text.literal(" Would you like to add these players to the group?").withColor(RgbFormat.GOLD)), false);
+                        // TODO: handle requests when switching to a public group
+                        context.getSource().sendFeedback(() -> Text.literal("[YES]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/say yes")).withColor(RgbFormat.GREEN)), false);
+                        context.getSource().sendFeedback(() -> Text.literal("[NO]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/group requests ")).withColor(RgbFormat.RED)), false);
+                    }
                 }
                 break;
             default:

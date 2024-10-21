@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import ong.aldenw.commands.suggestions.GroupSuggestions;
 import ong.aldenw.commands.suggestions.PlayerSuggestions;
 import ong.aldenw.commands.suggestions.JoinOptionSuggestions;
 
@@ -48,7 +49,11 @@ public class GroupCommand {
                                         .suggests(new JoinOptionSuggestions())
                                         .executes(GroupConfigCommand::joinOptionExecute))
                         )
-                );
+                )
+                .then(CommandManager.literal("join")
+                        .then(CommandManager.argument("groupName", StringArgumentType.string())
+                                .suggests(new GroupSuggestions())
+                                .executes(GroupJoinCommand::execute)));
 
     }
 }

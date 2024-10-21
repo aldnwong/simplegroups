@@ -1,5 +1,6 @@
 package ong.aldenw;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -9,6 +10,7 @@ import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
+import ong.aldenw.network.UpdateDisplayNamePayload;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +30,21 @@ public class GroupManager extends PersistentState {
             GroupManager::createFromNbt,
             null
     );
+
+    public static void updateClientDisplayNames(MinecraftServer server, GroupData groupData) {
+        server.getPlayerManager().getPlayerList().forEach(player -> {
+            String prefix = groupData.prefix;
+            int color = groupData.color;
+
+            groupData.players.forEach(uuid -> {
+                UpdateDisplayNamePayload data = new UpdateDisplayNamePayload(uuid.toString(), prefix, color);
+
+                server.execute(() -> {
+                    ServerPlayNetworking.send(player, data);
+                });
+            });
+        });
+    }
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
