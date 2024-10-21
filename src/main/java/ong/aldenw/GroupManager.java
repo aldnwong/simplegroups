@@ -11,6 +11,7 @@ import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 public class GroupManager extends PersistentState {
@@ -38,7 +39,7 @@ public class GroupManager extends PersistentState {
 
             NbtCompound groupPlayersNbt = new NbtCompound();
             groupData.players.forEach((uuid -> {
-                if (groupData.leader == uuid)
+                if (groupData.leader.equals(uuid))
                     groupPlayersNbt.putString(uuid.toString(), "LEADER");
                 else
                     groupPlayersNbt.putString(uuid.toString(), "MEMBER");
@@ -82,14 +83,18 @@ public class GroupManager extends PersistentState {
             groupData.open = groupsNbt.getCompound(key).getBoolean("open");
             groupData.color = groupsNbt.getCompound(key).getInt("color");
 
-            NbtCompound groupPlayersNbt = groupsNbt.getCompound("players");
+            NbtCompound groupPlayersNbt = groupsNbt.getCompound(key).getCompound("players");
             groupPlayersNbt.getKeys().forEach(playerKey -> {
-                UUID playerUUID = UUID.fromString(groupPlayersNbt.getString(playerKey));
-                if (groupPlayersNbt.getString(playerKey).equals("LEADER")) {
-                    groupData.leader = playerUUID;
-                    groupData.players.add(playerUUID);
-                } else {
-                    groupData.players.add(playerUUID);
+                String role = groupPlayersNbt.getString(playerKey);
+                SimpleGroups.LOGGER.info("UNLOADING GROUP PLAYER {}; IS {}", playerKey, role);
+                if (role.equals("LEADER")) {
+                    groupData.leader = UUID.fromString(playerKey);
+                    groupData.players.add(UUID.fromString(playerKey));
+                    SimpleGroups.LOGGER.info("FOUND GROUP LEADER");
+                }
+                else {
+                    groupData.players.add(UUID.fromString(playerKey));
+                    SimpleGroups.LOGGER.info("FOUND GROUP MEMBER");
                 }
             });
 
@@ -127,11 +132,19 @@ public class GroupManager extends PersistentState {
         if (!serverState.playerUuidCache.containsKey(playerName) || !serverState.playerUuidCache.get(playerName).equals(player.getUuid())) {
             serverState.playerUuidCache.put(playerName, player.getUuid());
         }
-        return serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
+        PlayerData playerData = serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
+        if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {
+            playerData.groupName = "";
+        }
+        return playerData;
     }
 
     public static PlayerData getPlayerState(UUID playerUuid, MinecraftServer server) {
         GroupManager serverState = getServerState(server);
-        return serverState.players.computeIfAbsent(playerUuid, uuid -> new PlayerData());
+        PlayerData playerData = serverState.players.computeIfAbsent(playerUuid, uuid -> new PlayerData());
+        if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {
+            playerData.groupName = "";
+        }
+        return playerData;
     }
 }
