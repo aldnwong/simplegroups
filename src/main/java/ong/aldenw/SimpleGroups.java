@@ -7,9 +7,10 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.util.Identifier;
-import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.UpdatePayload;
-import ong.aldenw.network.SyncPayload;
+import ong.aldenw.data.GroupData;
+import ong.aldenw.formats.RgbFormat;
+import ong.aldenw.network.UpdateDisplayNamePayload;
+import ong.aldenw.network.SyncDisplayNamePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,19 +18,30 @@ public class SimpleGroups implements ModInitializer {
 	public static final String MOD_ID = "simple-groups";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final Identifier INITIAL_SYNC = Identifier.of(MOD_ID, "initial_sync");
-	public static final Identifier GROUP_UPDATE = Identifier.of(MOD_ID, "group_update");
+	public static final Identifier DISPLAY_NAME_UPDATE = Identifier.of(MOD_ID, "display_name_update");
 
 	@Override
 	public void onInitialize() {
-		PayloadTypeRegistry.playS2C().register(SyncPayload.ID, SyncPayload.CODEC);
-		PayloadTypeRegistry.playS2C().register(UpdatePayload.ID, UpdatePayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(SyncDisplayNamePayload.ID, SyncDisplayNamePayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(UpdateDisplayNamePayload.ID, UpdateDisplayNamePayload.CODEC);
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			PlayerData playerState = GroupManager.getPlayerState(handler.getPlayer());
-			SyncPayload data = new SyncPayload(playerState.groupName);
+			GroupManager.getServerState(server).players.forEach((uuid, playerData) -> {
+				if (playerData.groupName.isEmpty()) {
+					SyncDisplayNamePayload data = new SyncDisplayNamePayload(uuid.toString(), "", RgbFormat.WHITE);
+					server.execute(() -> {
+						ServerPlayNetworking.send(handler.getPlayer(), data);
+					});
+				}
+				else {
+					GroupManager state = GroupManager.getServerState(server);
+					GroupData groupData = state.groupList.get(playerData.groupName);
 
-			server.execute(() -> {
-				ServerPlayNetworking.send(handler.getPlayer(), data);
+					SyncDisplayNamePayload data = new SyncDisplayNamePayload(uuid.toString(), groupData.prefix, groupData.color);
+					server.execute(() -> {
+						ServerPlayNetworking.send(handler.getPlayer(), data);
+					});
+				}
 			});
 		});
 
