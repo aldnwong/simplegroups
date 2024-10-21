@@ -10,8 +10,6 @@ import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbFormat;
 
-import static ong.aldenw.GroupManager.MAX_GROUP_NAME_LENGTH;
-
 public class GroupCreateCommand {
     public static int execute(CommandContext<ServerCommandSource> context) {
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
@@ -32,8 +30,8 @@ public class GroupCreateCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name already exists.").withColor(RgbFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
-        if (groupName.length() > MAX_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
+        if (groupName.length() > state.MAX_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
 

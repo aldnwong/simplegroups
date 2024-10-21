@@ -14,8 +14,6 @@ import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbFormat;
 import ong.aldenw.network.UpdateDisplayNamePayload;
 
-import static ong.aldenw.GroupManager.MAX_GROUP_NAME_LENGTH;
-
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
@@ -73,8 +71,8 @@ public class GroupConfigCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name exists already.").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
-        if (newName.length() > MAX_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
+        if (newName.length() > state.MAX_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters.").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
 
@@ -94,6 +92,23 @@ public class GroupConfigCommand {
             });
         });
         
+        return 1;
+    }
+
+    public static int prefixExecute(CommandContext<ServerCommandSource> context) {
+        if (!checkExecuteRequirements(context)) {
+            return 1;
+        }
+
+        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        PlayerEntity player = context.getSource().getPlayer();
+        PlayerData playerState = GroupManager.getPlayerState(player);
+        GroupData groupState = state.groupList.get(playerState.groupName);
+        String newName = StringArgumentType.getString(context, "name");
+        String oldName = playerState.groupName;
+
+
+
         return 1;
     }
 

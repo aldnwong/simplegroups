@@ -9,15 +9,14 @@ import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.formats.PrefixFormat;
 
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
 public class GroupManager extends PersistentState {
-    public static int MAX_GROUP_NAME_LENGTH = 20;
-    public static PrefixFormat PREFIX_FORMATTING = null;
+    public int MAX_GROUP_NAME_LENGTH = 25;
+    public int MAX_PREFIX_NAME_LENGTH = 20;
 
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
@@ -71,6 +70,12 @@ public class GroupManager extends PersistentState {
 
         nbt.put("playerUuidCache", playerUuidCacheNbt);
 
+        NbtCompound groupGlobalConfig = new NbtCompound();
+        groupGlobalConfig.putInt("maxGroupNameLength", MAX_GROUP_NAME_LENGTH);
+        groupGlobalConfig.putInt("maxPrefixNameLength", MAX_PREFIX_NAME_LENGTH);
+
+        nbt.put("globalConfig", groupGlobalConfig);
+
         return nbt;
     }
 
@@ -90,15 +95,12 @@ public class GroupManager extends PersistentState {
             NbtCompound groupPlayersNbt = groupsNbt.getCompound(key).getCompound("players");
             groupPlayersNbt.getKeys().forEach(playerKey -> {
                 String role = groupPlayersNbt.getString(playerKey);
-                SimpleGroups.LOGGER.info("UNLOADING GROUP PLAYER {}; IS {}", playerKey, role);
                 if (role.equals("LEADER")) {
                     groupData.leader = UUID.fromString(playerKey);
                     groupData.players.add(UUID.fromString(playerKey));
-                    SimpleGroups.LOGGER.info("FOUND GROUP LEADER");
                 }
                 else {
                     groupData.players.add(UUID.fromString(playerKey));
-                    SimpleGroups.LOGGER.info("FOUND GROUP MEMBER");
                 }
             });
 
@@ -119,6 +121,12 @@ public class GroupManager extends PersistentState {
         playerUuidCacheNbt.getKeys().forEach(key -> {
             state.playerUuidCache.put(key, UUID.fromString(playerUuidCacheNbt.getString(key)));
         });
+
+        NbtCompound globalConfig = tag.getCompound("globalConfig");
+        int maxGroupNameNbt = globalConfig.getInt("maxGroupNameLength");
+        int maxPrefixNameNbt = globalConfig.getInt("maxPrefixNameLength");
+        state.MAX_GROUP_NAME_LENGTH = (maxGroupNameNbt > 0) ? maxGroupNameNbt : 25;
+        state.MAX_PREFIX_NAME_LENGTH = (maxPrefixNameNbt > 0) ? maxPrefixNameNbt : 20;
 
         return state;
     }
