@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.UpdatePayload;
+import ong.aldenw.network.UpdateDisplayNamePayload;
 import ong.aldenw.formats.RgbFormat;
 
 public class GroupCreateCommand {
@@ -41,13 +41,7 @@ public class GroupCreateCommand {
 
         state.groupList.put(groupName, newGroupData);
 
-        UpdatePayload data = new UpdatePayload(playerState.groupName);
-
-        context.getSource().getServer().execute(() -> {
-            ServerPlayNetworking.send(player, data);
-        });
-
-        context.getSource().sendFeedback(() -> Text.literal("Created new group "+groupName+"."), false);
+        context.getSource().sendFeedback(() -> Text.literal("Created new group "+groupName).withColor(RgbFormat.GOLD), false);
         return 1;
     }
 }

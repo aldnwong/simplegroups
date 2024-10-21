@@ -7,9 +7,9 @@ import net.minecraft.network.packet.CustomPayload;
 
 import static ong.aldenw.SimpleGroups.GROUP_UPDATE;
 
-public record UpdatePayload(String groupName) implements CustomPayload {
+public record UpdatePayload(String playerUuid, String groupName) implements CustomPayload {
     public static final CustomPayload.Id<UpdatePayload> ID = new CustomPayload.Id<>(GROUP_UPDATE);
-    public static final PacketCodec<RegistryByteBuf, UpdatePayload> CODEC = PacketCodec.tuple(PacketCodecs.STRING, UpdatePayload::groupName, UpdatePayload::new);
+    public static final PacketCodec<RegistryByteBuf, UpdatePayload> CODEC = PacketCodec.tuple(PacketCodecs.STRING, UpdatePayload::playerUuid, PacketCodecs.STRING, UpdatePayload::groupName, UpdatePayload::new);
 
     @Override
     public CustomPayload.Id<? extends CustomPayload> getId() {
