@@ -14,6 +14,9 @@ import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbFormat;
 import ong.aldenw.network.UpdateDisplayNamePayload;
 
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
@@ -104,10 +107,50 @@ public class GroupConfigCommand {
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerState = GroupManager.getPlayerState(player);
         GroupData groupState = state.groupList.get(playerState.groupName);
-        String newName = StringArgumentType.getString(context, "name");
-        String oldName = playerState.groupName;
+        String newPrefix = StringArgumentType.getString(context, "prefix");
+        String oldPrefix = groupState.prefix;
 
+        if (newPrefix.equals(oldPrefix)) {
+            if (oldPrefix.isEmpty())
+                context.getSource().sendFeedback(() -> Text.literal("Your group's prefix is already empty").withColor(RgbFormat.YELLOW), false);
+            else
+                context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Your group's prefix is already ").withColor(RgbFormat.YELLOW)).append(Text.literal(oldPrefix).withColor(groupState.color)), false);
+            return 1;
+        }
+        if (newPrefix.length() > state.MAX_PREFIX_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Prefix must be shorter than " + state.MAX_PREFIX_NAME_LENGTH + " characters").withColor(RgbFormat.DARK_RED), false);
+            return 1;
+        }
+        if (state.getPrefixArray().contains(newPrefix)) {
+            context.getSource().sendFeedback(() -> Text.literal("A different group is already using that prefix").withColor(RgbFormat.DARK_RED), false);
+            return 1;
+        }
 
+        groupState.prefix = newPrefix;
+        if (oldPrefix.isEmpty()) {
+            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed prefix to ").withColor(RgbFormat.GOLD)).append(Text.literal(newPrefix).withColor(groupState.color)), false);
+
+            groupState.players.forEach(uuid -> {
+                context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
+                    if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
+                        serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's prefix has changed to ").withColor(RgbFormat.GOLD)).append(Text.literal(newPrefix).withColor(groupState.color)));
+                    }
+                });
+            });
+        }
+        else {
+            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed prefix from ").withColor(RgbFormat.GOLD)).append(Text.literal(oldPrefix).withColor(groupState.color)).append(Text.literal(" to ").withColor(RgbFormat.GOLD)).append(Text.literal(newPrefix).withColor(groupState.color)), false);
+
+            groupState.players.forEach(uuid -> {
+                context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
+                    if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
+                        serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's prefix has changed from ").withColor(RgbFormat.GOLD)).append(Text.literal(oldPrefix).withColor(groupState.color)).append(Text.literal(" to ").withColor(RgbFormat.GOLD)).append(Text.literal(newPrefix).withColor(groupState.color)));
+                    }
+                });
+            });
+        }
+
+        updateClientDisplayNames(context.getSource().getServer(), groupState);
 
         return 1;
     }
@@ -124,6 +167,8 @@ public class GroupConfigCommand {
         int r = IntegerArgumentType.getInteger(context, "r");
         int g = IntegerArgumentType.getInteger(context, "g");
         int b = IntegerArgumentType.getInteger(context, "b");
+        int newColor = RgbFormat.fromThree(r, g, b);
+        int oldColor = groupState.color;
 
 
         if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
@@ -136,12 +181,12 @@ public class GroupConfigCommand {
         }
 
         groupState.color = RgbFormat.fromThree(r, g, b);
-        context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed ").withColor(RgbFormat.GOLD)).append(Text.literal(playerState.groupName).withColor(groupState.color)).append(Text.literal("'s color to ").withColor(RgbFormat.GOLD)).append(Text.literal("(" + r + ", " + g + ", " + b + ")").withColor(groupState.color)), false);
+        context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed color from ").withColor(RgbFormat.GOLD)).append(Text.literal("this").withColor(oldColor)).append(Text.literal(" to ").withColor(RgbFormat.GOLD)).append(Text.literal("this").withColor(newColor)), false);
 
         groupState.players.forEach(uuid -> {
             context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
                 if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
-                    serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's color has changed to ").withColor(RgbFormat.GOLD)).append(Text.literal("this").withColor(groupState.color)));
+                    serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's color has changed from ").withColor(RgbFormat.GOLD)).append(Text.literal("this").withColor(oldColor)).append(Text.literal(" to ").withColor(RgbFormat.GOLD)).append(Text.literal("this").withColor(newColor)));
                 }
             });
         });

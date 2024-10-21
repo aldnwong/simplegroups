@@ -31,7 +31,7 @@ public class GroupCommand {
                         )
                         .then(CommandManager.literal("prefix")
                                 .then(CommandManager.argument("prefix", StringArgumentType.string())
-                                        .executes(GroupCreateCommand::execute))
+                                        .executes(GroupConfigCommand::prefixExecute))
                         )
                         .then(CommandManager.literal("color")
                                 .then(CommandManager.argument("r", IntegerArgumentType.integer())

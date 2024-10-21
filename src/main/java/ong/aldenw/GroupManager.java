@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -158,5 +159,13 @@ public class GroupManager extends PersistentState {
             playerData.groupName = "";
         }
         return playerData;
+    }
+
+    public ArrayList<String> getPrefixArray() {
+        ArrayList<String> prefixCache = new ArrayList<>();
+        groupList.forEach((name, groupData) -> {
+            prefixCache.add(groupData.prefix);
+        });
+        return prefixCache;
     }
 }
