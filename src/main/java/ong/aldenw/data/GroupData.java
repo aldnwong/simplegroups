@@ -12,5 +12,5 @@ public class GroupData {
     public boolean listed = false;
     public boolean open = false;
     public UUID leader;
-    public ArrayList<UUID> players = new ArrayList<UUID>();
+    public ArrayList<UUID> players = new ArrayList<>();
 }
