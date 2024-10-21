@@ -223,8 +223,8 @@ public class GroupConfigCommand {
                         else
                             context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("There are " + groupState.requests.size() + " requests to join the group.").withColor(RgbFormat.GRAY)).append(Text.literal(" Would you like to add these players to the group?").withColor(RgbFormat.GOLD)), false);
                         // TODO: handle requests when switching to a public group
-                        context.getSource().sendFeedback(() -> Text.literal("[YES]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/say yes")).withColor(RgbFormat.GREEN)), false);
-                        context.getSource().sendFeedback(() -> Text.literal("[NO]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/group requests ")).withColor(RgbFormat.RED)), false);
+                        context.getSource().sendFeedback(() -> Text.literal("[YES]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/me yes")).withColor(RgbFormat.GREEN)), false);
+                        context.getSource().sendFeedback(() -> Text.literal("[NO]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/me no")).withColor(RgbFormat.RED)), false);
                     }
                 }
                 break;
