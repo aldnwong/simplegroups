@@ -17,15 +17,15 @@ import ong.aldenw.network.UpdateDisplayNamePayload;
 
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
-        PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerState = GroupManager.getPlayerState(player);
-        GroupData groupState = state.groupList.get(playerState.groupName);
-
         if (!context.getSource().isExecutedByPlayer()) {
             context.getSource().sendFeedback(() -> Text.literal("This command is only available to players.").withColor(RgbFormat.DARK_RED), false);
             return false;
         }
+
+        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        PlayerEntity player = context.getSource().getPlayer();
+        PlayerData playerState = GroupManager.getPlayerState(player);
+        GroupData groupState = state.groupList.get(playerState.groupName);
         if (playerState.groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group.").withColor(RgbFormat.DARK_RED), false);
             return false;
@@ -52,7 +52,26 @@ public class GroupConfigCommand {
         });
     }
 
+    public static int nameExecute(CommandContext<ServerCommandSource> context) {
+        if (!checkExecuteRequirements(context)) {
+            return 1;
+        }
+
+        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        PlayerEntity player = context.getSource().getPlayer();
+        PlayerData playerState = GroupManager.getPlayerState(player);
+        GroupData groupState = state.groupList.get(playerState.groupName);
+
+
+        
+        return 1;
+    }
+
     public static int colorExecute(CommandContext<ServerCommandSource> context) {
+        if (!checkExecuteRequirements(context)) {
+            return 1;
+        }
+
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerState = GroupManager.getPlayerState(player);
@@ -61,9 +80,7 @@ public class GroupConfigCommand {
         int g = IntegerArgumentType.getInteger(context, "g");
         int b = IntegerArgumentType.getInteger(context, "b");
 
-        if (!checkExecuteRequirements(context)) {
-            return 1;
-        }
+
         if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
             context.getSource().sendFeedback(() -> Text.literal("Invalid color. Values must be from 0-255.").withColor(RgbFormat.DARK_RED), false);
             return 1;
