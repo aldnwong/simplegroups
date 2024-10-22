@@ -3,14 +3,14 @@ package ong.aldenw.mixin;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import ong.aldenw.GroupManager;
-import ong.aldenw.data.GroupData;
+import ong.aldenw.CacheManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Mixin(PlayerEntity.class)
 public abstract class DisplayNameMixin {
@@ -19,17 +19,19 @@ public abstract class DisplayNameMixin {
     @ModifyVariable(method = "getDisplayName", at = @At("STORE"), ordinal = 0)
     private MutableText injected(MutableText mutableText) {
         PlayerEntity player = (PlayerEntity)(Object)this;
-        GroupManager state = GroupManager.getServerState(Objects.requireNonNull(player.getServer()));
-        String groupName = GroupManager.getPlayerState(player).groupName;
-        GroupData groupState = state.groupList.get(groupName);
-        if(groupName.isEmpty()) {
-            return Text.empty().append(this.getName());
+        UUID playerUuid = player.getUuid();
+        String playerName = player.getName().getString();
+        if (Objects.isNull(CacheManager.playerPrefixDataHashMap.get(playerUuid)) || Objects.isNull(CacheManager.playerColorDataHashMap.get(playerUuid))) {
+            return Text.literal(playerName);
         }
-        else if (groupState.prefix.isEmpty()) {
-            return Text.empty().append(this.getName()).withColor(groupState.color);
+
+        String prefix = CacheManager.playerPrefixDataHashMap.get(playerUuid);
+        int color = CacheManager.playerColorDataHashMap.get(playerUuid);
+        if (prefix.isEmpty()) {
+            return  Text.literal(playerName).withColor(color);
         }
         else {
-            return Text.empty().append(groupState.prefix).append(" ").append(this.getName()).withColor(groupState.color);
+            return Text.literal(prefix + " " + playerName).withColor(color);
         }
     }
 }

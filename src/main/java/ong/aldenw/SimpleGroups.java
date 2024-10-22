@@ -25,25 +25,7 @@ public class SimpleGroups implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(SyncDisplayNamePayload.ID, SyncDisplayNamePayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(UpdateDisplayNamePayload.ID, UpdateDisplayNamePayload.CODEC);
 
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			GroupManager.getServerState(server).players.forEach((uuid, playerData) -> {
-				if (playerData.groupName.isEmpty()) {
-					SyncDisplayNamePayload data = new SyncDisplayNamePayload(uuid.toString(), "", RgbFormat.WHITE);
-					server.execute(() -> {
-						ServerPlayNetworking.send(handler.getPlayer(), data);
-					});
-				}
-				else {
-					GroupManager state = GroupManager.getServerState(server);
-					GroupData groupData = state.groupList.get(playerData.groupName);
-
-					SyncDisplayNamePayload data = new SyncDisplayNamePayload(uuid.toString(), groupData.prefix, groupData.color);
-					server.execute(() -> {
-						ServerPlayNetworking.send(handler.getPlayer(), data);
-					});
-				}
-			});
-		});
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> CacheManager.updatePlayerCache(handler.getPlayer(), GroupManager.getServerState(server)));
 
 		CommandRegistrationCallback.EVENT.register(CommandManager::initialize);
 		LOGGER.info("Simple Groups plugin initialized. :3");

@@ -1,6 +1,5 @@
 package ong.aldenw;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -10,7 +9,6 @@ import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.network.UpdateDisplayNamePayload;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,13 +34,7 @@ public class GroupManager extends PersistentState {
             String prefix = groupData.prefix;
             int color = groupData.color;
 
-            groupData.players.forEach(uuid -> {
-                UpdateDisplayNamePayload data = new UpdateDisplayNamePayload(uuid.toString(), prefix, color);
-
-                server.execute(() -> {
-                    ServerPlayNetworking.send(player, data);
-                });
-            });
+            CacheManager.updateCache(groupData, server);
         });
     }
 
@@ -145,6 +137,8 @@ public class GroupManager extends PersistentState {
         int maxPrefixNameNbt = globalConfig.getInt("maxPrefixNameLength");
         state.MAX_GROUP_NAME_LENGTH = (maxGroupNameNbt > 0) ? maxGroupNameNbt : 25;
         state.MAX_PREFIX_NAME_LENGTH = (maxPrefixNameNbt > 0) ? maxPrefixNameNbt : 20;
+
+        CacheManager.createCache(state);
 
         return state;
     }

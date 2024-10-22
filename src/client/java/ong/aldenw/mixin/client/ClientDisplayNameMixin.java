@@ -3,8 +3,7 @@ package ong.aldenw.mixin.client;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.Text;
-import ong.aldenw.SimpleGroups;
-import ong.aldenw.SimpleGroupsClient;
+import ong.aldenw.ClientCacheManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,13 +21,13 @@ public abstract class ClientDisplayNameMixin {
 	private void injected(CallbackInfoReturnable<Text> cir) {
 		UUID playerUuid = this.getProfile().getId();
 		String playerName = this.getProfile().getName();
-		if (Objects.isNull(SimpleGroupsClient.playerPrefixDataHashMap.get(playerUuid)) || Objects.isNull(SimpleGroupsClient.playerColorDataHashMap.get(playerUuid))) {
+		if (Objects.isNull(ClientCacheManager.playerPrefixDataHashMap.get(playerUuid)) || Objects.isNull(ClientCacheManager.playerColorDataHashMap.get(playerUuid))) {
 			cir.setReturnValue(Text.literal(playerName));
 			return;
 		}
 
-		String prefix = SimpleGroupsClient.playerPrefixDataHashMap.get(playerUuid);
-		int color = SimpleGroupsClient.playerColorDataHashMap.get(playerUuid);
+		String prefix = ClientCacheManager.playerPrefixDataHashMap.get(playerUuid);
+		int color = ClientCacheManager.playerColorDataHashMap.get(playerUuid);
 		if (prefix.isEmpty()) {
 			cir.setReturnValue(Text.literal(playerName).withColor(color));
 		}

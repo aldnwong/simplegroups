@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import ong.aldenw.CacheManager;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
@@ -44,7 +45,7 @@ public class GroupJoinCommand {
         groupState.players.add(player.getUuid());
         playerState.groupName = groupName;
 
-        GroupManager.updateClientDisplayNames(context.getSource().getServer(), groupState);
+        CacheManager.updateCache(groupState, context.getSource().getServer());
 
         context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("You have joined ").withColor(RgbFormat.GOLD).append(Text.literal(groupName).withColor(groupState.color))), false);
 
