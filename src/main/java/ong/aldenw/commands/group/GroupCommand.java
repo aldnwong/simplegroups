@@ -1,4 +1,4 @@
-package ong.aldenw.commands;
+package ong.aldenw.commands.group;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -53,7 +53,8 @@ public class GroupCommand {
                 .then(CommandManager.literal("join")
                         .then(CommandManager.argument("groupName", StringArgumentType.string())
                                 .suggests(new GroupSuggestions())
-                                .executes(GroupJoinCommand::execute)));
+                                .executes(GroupJoinCommand::execute)))
+                .then(CommandManager.literal("requests"));
 
     }
 }
