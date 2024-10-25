@@ -3,19 +3,16 @@ package ong.aldenw.commands.group;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
-import ong.aldenw.formats.RgbFormat;
 
 public class GroupRequestsCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
-            context.getSource().sendFeedback(() -> Text.literal("This command is only available to players").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("This command is only available to players").formatted(Formatting.DARK_RED), false);
             return false;
         }
 
@@ -25,11 +22,11 @@ public class GroupRequestsCommand {
         GroupData groupData = state.groupList.get(playerData.groupName);
 
         if (playerData.groupName.isEmpty()) {
-            context.getSource().sendFeedback(() -> Text.literal("You are not in a group").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
         if (!player.getUuid().equals(groupData.leader)) {
-            context.getSource().sendFeedback(() -> Text.literal("You do not have permission to view or modify requests for this group").withColor(RgbFormat.DARK_RED), false);
+            context.getSource().sendFeedback(() -> Text.literal("You do not have permission to view or modify requests for this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
         return true;
