@@ -18,25 +18,15 @@ import java.util.UUID;
 public class GroupManager extends PersistentState {
     public int MAX_GROUP_NAME_LENGTH = 25;
     public int MAX_PREFIX_NAME_LENGTH = 20;
-
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
-    public HashMap<String, UUID> playerUuidCache = new HashMap<>();
+    public HashMap<String, UUID> playerUuids = new HashMap<>();
 
     private static final Type<GroupManager> type = new Type<>(
             GroupManager::new,
             GroupManager::createFromNbt,
             null
     );
-
-    public static void updateClientDisplayNames(MinecraftServer server, GroupData groupData) {
-        server.getPlayerManager().getPlayerList().forEach(player -> {
-            String prefix = groupData.prefix;
-            int color = groupData.color;
-
-            CacheManager.updateCache(groupData, server);
-        });
-    }
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
@@ -73,12 +63,12 @@ public class GroupManager extends PersistentState {
 
         nbt.put("players", playersNbt);
 
-        NbtCompound playerUuidCacheNbt = new NbtCompound();
-        playerUuidCache.forEach(((username, uuid) -> {
-            playerUuidCacheNbt.putString(username, uuid.toString());
+        NbtCompound playerUuidsNbt = new NbtCompound();
+        playerUuids.forEach(((username, uuid) -> {
+            playerUuidsNbt.putString(username, uuid.toString());
         }));
 
-        nbt.put("playerUuidCache", playerUuidCacheNbt);
+        nbt.put("playerUuids", playerUuidsNbt);
 
         NbtCompound groupGlobalConfig = new NbtCompound();
         groupGlobalConfig.putInt("maxGroupNameLength", MAX_GROUP_NAME_LENGTH);
@@ -127,9 +117,9 @@ public class GroupManager extends PersistentState {
             state.players.put(uuid, playerData);
         });
 
-        NbtCompound playerUuidCacheNbt = tag.getCompound("playerUuidCache");
-        playerUuidCacheNbt.getKeys().forEach(key -> {
-            state.playerUuidCache.put(key, UUID.fromString(playerUuidCacheNbt.getString(key)));
+        NbtCompound playerUuidsNbt = tag.getCompound("playerUuids");
+        playerUuidsNbt.getKeys().forEach(key -> {
+            state.playerUuids.put(key, UUID.fromString(playerUuidsNbt.getString(key)));
         });
 
         NbtCompound globalConfig = tag.getCompound("globalConfig");
@@ -153,8 +143,8 @@ public class GroupManager extends PersistentState {
     public static PlayerData getPlayerState(LivingEntity player) {
         GroupManager serverState = getServerState(player.getWorld().getServer());
         String playerName = player.getName().getString();
-        if (!serverState.playerUuidCache.containsKey(playerName) || !serverState.playerUuidCache.get(playerName).equals(player.getUuid())) {
-            serverState.playerUuidCache.put(playerName, player.getUuid());
+        if (!serverState.playerUuids.containsKey(playerName) || !serverState.playerUuids.get(playerName).equals(player.getUuid())) {
+            serverState.playerUuids.put(playerName, player.getUuid());
         }
         PlayerData playerData = serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
         if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {

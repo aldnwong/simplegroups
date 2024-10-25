@@ -23,7 +23,7 @@ public class PlayerSuggestions implements SuggestionProvider<ServerCommandSource
             builder.suggest(playerName);
         }
 
-        GroupManager.getServerState(source.getServer()).playerUuidCache.forEach((username, uuid) -> {
+        GroupManager.getServerState(source.getServer()).playerUuids.forEach((username, uuid) -> {
             if (!playerNames.contains(username)) {
                 builder.suggest(username);
             }

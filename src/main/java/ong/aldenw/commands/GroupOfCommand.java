@@ -19,12 +19,12 @@ public class GroupOfCommand {
         GroupManager serverState = GroupManager.getServerState(server);
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerArg);
 
-        if(!Objects.nonNull(player) && !serverState.playerUuidCache.containsKey(playerArg)) {
+        if(!Objects.nonNull(player) && !serverState.playerUuids.containsKey(playerArg)) {
             context.getSource().sendFeedback(() -> Text.literal("Player not found.").withColor(RgbFormat.DARK_RED), false);
             return 1;
         }
 
-        PlayerData playerState = (Objects.nonNull(player)) ? GroupManager.getPlayerState(player) : GroupManager.getPlayerState(serverState.playerUuidCache.get(playerArg), server);
+        PlayerData playerState = (Objects.nonNull(player)) ? GroupManager.getPlayerState(player) : GroupManager.getPlayerState(serverState.playerUuids.get(playerArg), server);
         String result = !playerState.groupName.isEmpty() ? playerArg + " is in group " + playerState.groupName : playerArg + " is not in a group";
 
         context.getSource().sendFeedback(() -> Text.literal(result), false);

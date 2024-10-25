@@ -1,11 +1,9 @@
 package ong.aldenw;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import ong.aldenw.data.GroupData;
-import ong.aldenw.network.SyncDisplayNamePayload;
 import ong.aldenw.network.UpdateDisplayNamePayload;
 
 import java.util.HashMap;
@@ -38,7 +36,7 @@ public class CacheManager {
     public static void updatePlayerCache(ServerPlayerEntity player, GroupManager state) {
         state.groupList.forEach((name, groupData) -> {
             groupData.players.forEach(uuid -> {
-                ServerPlayNetworking.send(player, new SyncDisplayNamePayload(uuid.toString(), groupData.prefix, groupData.color));
+                ServerPlayNetworking.send(player, new UpdateDisplayNamePayload(uuid.toString(), groupData.prefix, groupData.color));
             });
         });
     }
