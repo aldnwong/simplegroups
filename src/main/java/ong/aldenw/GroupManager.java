@@ -128,7 +128,7 @@ public class GroupManager extends PersistentState {
         state.MAX_GROUP_NAME_LENGTH = (maxGroupNameNbt > 0) ? maxGroupNameNbt : 25;
         state.MAX_PREFIX_NAME_LENGTH = (maxPrefixNameNbt > 0) ? maxPrefixNameNbt : 20;
 
-        CacheManager.createCache(state);
+        NetworkManager.createCache(state);
 
         return state;
     }

@@ -8,7 +8,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import ong.aldenw.CacheManager;
+import ong.aldenw.NetworkManager;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
@@ -132,7 +132,7 @@ public class GroupConfigCommand {
             });
         }
 
-        CacheManager.updateCache(groupState, context.getSource().getServer());
+        NetworkManager.updateCache(groupState, context.getSource().getServer());
 
         return 1;
     }
@@ -173,7 +173,7 @@ public class GroupConfigCommand {
             });
         });
 
-        CacheManager.updateCache(groupState, context.getSource().getServer());
+        NetworkManager.updateCache(groupState, context.getSource().getServer());
 
         return 1;
     }

@@ -3,7 +3,7 @@ package ong.aldenw.mixin;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import ong.aldenw.CacheManager;
+import ong.aldenw.NetworkManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,12 +21,12 @@ public abstract class DisplayNameMixin {
         PlayerEntity player = (PlayerEntity)(Object)this;
         UUID playerUuid = player.getUuid();
         String playerName = player.getName().getString();
-        if (Objects.isNull(CacheManager.playerPrefixDataHashMap.get(playerUuid)) || Objects.isNull(CacheManager.playerColorDataHashMap.get(playerUuid))) {
+        if (Objects.isNull(NetworkManager.playerPrefixDataHashMap.get(playerUuid)) || Objects.isNull(NetworkManager.playerColorDataHashMap.get(playerUuid))) {
             return Text.literal(playerName);
         }
 
-        String prefix = CacheManager.playerPrefixDataHashMap.get(playerUuid);
-        int color = CacheManager.playerColorDataHashMap.get(playerUuid);
+        String prefix = NetworkManager.playerPrefixDataHashMap.get(playerUuid);
+        int color = NetworkManager.playerColorDataHashMap.get(playerUuid);
         if (prefix.isEmpty()) {
             return  Text.literal(playerName).withColor(color);
         }

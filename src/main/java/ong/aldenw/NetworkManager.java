@@ -9,7 +9,7 @@ import ong.aldenw.network.UpdateDisplayNamePayload;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class CacheManager {
+public class NetworkManager {
     public static HashMap<UUID, String> playerPrefixDataHashMap = new HashMap<>();
     public static HashMap<UUID, Integer> playerColorDataHashMap = new HashMap<>();
 

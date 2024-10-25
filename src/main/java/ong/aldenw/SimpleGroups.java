@@ -18,7 +18,7 @@ public class SimpleGroups implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		PayloadTypeRegistry.playS2C().register(UpdateDisplayNamePayload.ID, UpdateDisplayNamePayload.CODEC);
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> CacheManager.updatePlayerCache(handler.getPlayer(), GroupManager.getServerState(server)));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> NetworkManager.updatePlayerCache(handler.getPlayer(), GroupManager.getServerState(server)));
 
 		CommandRegistrationCallback.EVENT.register(CommandManager::initialize);
 		LOGGER.info("Simple Groups plugin initialized. :3");
