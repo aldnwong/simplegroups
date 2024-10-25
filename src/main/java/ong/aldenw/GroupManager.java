@@ -1,7 +1,7 @@
 package ong.aldenw;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.*;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.PersistentState;
@@ -49,6 +49,10 @@ public class GroupManager extends PersistentState {
             }));
             groupNbt.put("players", groupPlayersNbt);
 
+            NbtCompound groupRequestsNbt = new NbtCompound();
+            groupData.requests.forEach((uuid -> groupRequestsNbt.putString(uuid.toString(), ":3")));
+            groupNbt.put("requests", groupRequestsNbt);
+
             groupsNbt.put(id, groupNbt);
         }));
 
@@ -58,6 +62,7 @@ public class GroupManager extends PersistentState {
         players.forEach(((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
             playerNbt.putString("groupId", playerData.groupName);
+            playerNbt.putString("username", playerData.username);
             playersNbt.put(uuid.toString(), playerNbt);
         }));
 
@@ -104,6 +109,9 @@ public class GroupManager extends PersistentState {
                 }
             });
 
+            NbtCompound groupRequestsNbt = groupsNbt.getCompound(key).getCompound("requests");
+            groupRequestsNbt.getKeys().forEach(playerKey -> groupData.requests.add(UUID.fromString(playerKey)));
+
             state.groupList.put(key, groupData);
         });
 
@@ -112,6 +120,7 @@ public class GroupManager extends PersistentState {
             PlayerData playerData = new PlayerData();
 
             playerData.groupName = playersNbt.getCompound(key).getString("groupId");
+            playerData.username = playersNbt.getCompound(key).getString("username");
 
             UUID uuid = UUID.fromString(key);
             state.players.put(uuid, playerData);
@@ -149,6 +158,9 @@ public class GroupManager extends PersistentState {
         PlayerData playerData = serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
         if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {
             playerData.groupName = "";
+        }
+        if (!playerData.username.equals(playerName)) {
+            playerData.username = playerName;
         }
         return playerData;
     }

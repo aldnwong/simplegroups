@@ -8,6 +8,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import ong.aldenw.commands.suggestions.GroupSuggestions;
 import ong.aldenw.commands.suggestions.PlayerSuggestions;
 import ong.aldenw.commands.suggestions.JoinOptionSuggestions;
+import ong.aldenw.commands.suggestions.RequestSuggestions;
 
 public class GroupCommand {
     public final static String commandName = "group";
@@ -54,7 +55,17 @@ public class GroupCommand {
                         .then(CommandManager.argument("groupName", StringArgumentType.string())
                                 .suggests(new GroupSuggestions())
                                 .executes(GroupJoinCommand::execute)))
-                .then(CommandManager.literal("requests"));
+                .then(CommandManager.literal("requests")
+                        .then(CommandManager.literal("view")
+                                .executes(GroupRequestsCommand::viewExecute))
+                        .then(CommandManager.literal("accept")
+                                .then(CommandManager.argument("player", StringArgumentType.string())
+                                        .suggests(new RequestSuggestions())
+                                        .executes(GroupRequestsCommand::acceptExecute)))
+                        .then(CommandManager.literal("deny")
+                                .then(CommandManager.argument("player", StringArgumentType.string())
+                                        .suggests(new RequestSuggestions())
+                                        .executes(GroupRequestsCommand::denyExecute))));
 
     }
 }

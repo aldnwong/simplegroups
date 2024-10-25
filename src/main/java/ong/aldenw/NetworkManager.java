@@ -3,6 +3,8 @@ package ong.aldenw;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.network.UpdateDisplayNamePayload;
 
@@ -37,6 +39,9 @@ public class NetworkManager {
         state.groupList.forEach((name, groupData) -> {
             groupData.players.forEach(uuid -> {
                 ServerPlayNetworking.send(player, new UpdateDisplayNamePayload(uuid.toString(), groupData.prefix, groupData.color));
+                if (groupData.leader.equals(player.getUuid()) && !groupData.requests.isEmpty()) {
+                    player.sendMessage(Text.empty().append(Text.literal("Your group has ").formatted(Formatting.GOLD)).append(Text.literal(groupData.requests.size() + "").formatted(Formatting.AQUA)).append(Text.literal((groupData.requests.size() == 1) ? " join request!" : "join requests!").formatted(Formatting.GOLD)));
+                }
             });
         });
     }
