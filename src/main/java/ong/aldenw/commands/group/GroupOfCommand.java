@@ -31,7 +31,7 @@ public class GroupOfCommand {
         }
         else {
             GroupData groupData = serverState.groupList.get(playerState.groupName);
-            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal(playerArg).withColor(groupData.color)).append(Text.literal(" is in group ").formatted(Formatting.GOLD)).append(Text.literal(groupData.displayName).withColor(groupData.color)), false);
+            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal(playerArg).withColor(groupData.color)).append(Text.literal(" is in group ").formatted(Formatting.GOLD)).append(Text.literal(groupData.name).withColor(groupData.color)), false);
         }
         return 1;
     }

@@ -48,7 +48,7 @@ public class GroupConfigCommand {
         PlayerData playerData = GroupManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         String newName = StringArgumentType.getString(context, "name");
-        String oldName = playerData.groupName;
+        String oldName = groupData.name;
 
         if (newName.equals(oldName)) {
             context.getSource().sendFeedback(() -> Text.literal("Your group already has that name").formatted(Formatting.YELLOW), false);
@@ -65,6 +65,7 @@ public class GroupConfigCommand {
 
         state.groupList.put(newName, groupData);
         state.groupList.remove(oldName);
+        groupData.name = newName;
         groupData.players.forEach(uuid -> {
             state.players.get(uuid).groupName = newName;
         });

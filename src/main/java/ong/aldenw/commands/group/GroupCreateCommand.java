@@ -37,8 +37,7 @@ public class GroupCreateCommand {
         }
 
         playerState.groupName = groupName;
-
-        newGroupData.displayName = groupName;
+        newGroupData.name = groupName;
         newGroupData.leader = player.getUuid();
         newGroupData.players.add(player.getUuid());
 

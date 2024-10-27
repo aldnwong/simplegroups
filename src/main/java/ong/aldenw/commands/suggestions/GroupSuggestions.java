@@ -17,7 +17,7 @@ public class GroupSuggestions implements SuggestionProvider<ServerCommandSource>
 
         state.groupList.forEach((id, groupData) -> {
             if (groupData.listed) {
-                builder.suggest(groupData.displayName);
+                builder.suggest(groupData.name);
             }
         });
 

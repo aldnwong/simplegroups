@@ -34,7 +34,6 @@ public class GroupManager extends PersistentState {
         groupList.forEach(((id, groupData) -> {
             NbtCompound groupNbt = new NbtCompound();
 
-            groupNbt.putString("displayName", groupData.displayName);
             groupNbt.putString("prefix", groupData.prefix);
             groupNbt.putBoolean("listed", groupData.listed);
             groupNbt.putBoolean("open", groupData.open);
@@ -91,7 +90,6 @@ public class GroupManager extends PersistentState {
         groupsNbt.getKeys().forEach(key -> {
             GroupData groupData = new GroupData();
 
-            groupData.displayName = groupsNbt.getCompound(key).getString("displayName");
             groupData.prefix = groupsNbt.getCompound(key).getString("prefix");
             groupData.listed = groupsNbt.getCompound(key).getBoolean("listed");
             groupData.open = groupsNbt.getCompound(key).getBoolean("open");

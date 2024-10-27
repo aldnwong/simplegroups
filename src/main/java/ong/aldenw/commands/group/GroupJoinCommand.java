@@ -37,9 +37,15 @@ public class GroupJoinCommand {
             return 1;
         }
         if (!groupState.open) {
-            groupState.requests.add(player.getUuid());
-            context.getSource().sendFeedback(() -> Text.literal("A join request has been sent to the group").formatted(Formatting.YELLOW), false);
-            return 1;
+            if (groupState.requests.contains(player.getUuid())) {
+                context.getSource().sendFeedback(() -> Text.literal("You have already requested to join this group").formatted(Formatting.YELLOW), false);
+                return 1;
+            }
+            else {
+                groupState.requests.add(player.getUuid());
+                context.getSource().sendFeedback(() -> Text.literal("A join request has been sent to the group").formatted(Formatting.YELLOW), false);
+                return 1;
+            }
         }
 
         groupState.players.add(player.getUuid());
