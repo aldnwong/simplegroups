@@ -15,6 +15,12 @@ public class NetworkManager {
     public static HashMap<UUID, String> playerPrefixDataHashMap = new HashMap<>();
     public static HashMap<UUID, Integer> playerColorDataHashMap = new HashMap<>();
 
+    /*
+    * TODO: Update everything to handle players being removed from a group
+    * It would probably be better to have updateCache handle the update of an individual player
+    * Need to go through code to see where player data is being changed as well
+    */
+
     public static void createCache(GroupManager state) {
         state.groupList.forEach((name, groupData) -> {
             groupData.players.forEach(uuid -> {

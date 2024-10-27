@@ -44,15 +44,17 @@ public class GroupJoinCommand {
             else {
                 groupState.requests.add(player.getUuid());
                 context.getSource().sendFeedback(() -> Text.literal("A join request has been sent to the group").formatted(Formatting.YELLOW), false);
+                context.getSource().getServer().getPlayerManager().getPlayerList().forEach(playerInList -> {
+                    if (playerInList.getUuid().equals(groupState.leader)) {
+                        playerInList.sendMessage(Text.empty().append(Text.literal(player.getName().getString())).append(Text.literal(" has requested to join your group").formatted(Formatting.YELLOW)));
+                    }
+                });
                 return 1;
             }
         }
 
-        groupState.players.add(player.getUuid());
-        playerState.groupName = groupName;
-
+        groupState.addPlayer(player.getUuid(), state);
         NetworkManager.updateCache(groupState, context.getSource().getServer());
-
         context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("You have joined ").formatted(Formatting.GOLD).append(Text.literal(groupName).withColor(groupState.color))), false);
 
         groupState.players.forEach(uuid -> {

@@ -16,6 +16,7 @@ import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
 
 public class GroupConfigCommand {
+    // TODO: Optimize mutual variable usage
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
             context.getSource().sendFeedback(() -> Text.literal("This command is only available to players").formatted(Formatting.DARK_RED), false);

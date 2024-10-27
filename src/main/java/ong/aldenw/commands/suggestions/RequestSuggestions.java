@@ -15,6 +15,7 @@ import ong.aldenw.data.PlayerData;
 import java.util.concurrent.CompletableFuture;
 
 public class RequestSuggestions implements SuggestionProvider<ServerCommandSource> {
+    public static final String ALL_REQUESTS_PARAMETER = "ALL_JOIN_REQUESTS";
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
@@ -28,7 +29,7 @@ public class RequestSuggestions implements SuggestionProvider<ServerCommandSourc
 
         groupData.requests.forEach(uuid -> builder.suggest(state.players.get(uuid).username));
 
-        builder.suggest("@all");
+        builder.suggest(ALL_REQUESTS_PARAMETER);
 
         return builder.buildFuture();
     }

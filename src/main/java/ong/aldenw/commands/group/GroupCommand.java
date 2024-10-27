@@ -55,6 +55,8 @@ public class GroupCommand {
                         .then(CommandManager.argument("groupName", StringArgumentType.string())
                                 .suggests(new GroupSuggestions())
                                 .executes(GroupJoinCommand::execute)))
+                .then(CommandManager.literal("leave")
+                        .executes(GroupLeaveCommand::execute))
                 .then(CommandManager.literal("requests")
                         .then(CommandManager.literal("view")
                                 .executes(GroupRequestsCommand::viewExecute))
