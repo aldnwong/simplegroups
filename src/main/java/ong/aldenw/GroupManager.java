@@ -34,15 +34,15 @@ public class GroupManager extends PersistentState {
         groupList.forEach(((id, groupData) -> {
             NbtCompound groupNbt = new NbtCompound();
 
-            groupNbt.putString("name", groupData.name);
-            groupNbt.putString("prefix", groupData.prefix);
-            groupNbt.putBoolean("listed", groupData.listed);
-            groupNbt.putBoolean("open", groupData.open);
-            groupNbt.putInt("color", groupData.color);
+            groupNbt.putString("name", groupData.getName());
+            groupNbt.putString("prefix", groupData.getPrefix());
+            groupNbt.putBoolean("listed", groupData.isListed());
+            groupNbt.putBoolean("open", groupData.isOpen());
+            groupNbt.putInt("color", groupData.getColor());
 
             NbtCompound groupPlayersNbt = new NbtCompound();
-            groupData.players.forEach((uuid -> {
-                if (groupData.leader.equals(uuid))
+            groupData.getPlayers().forEach((uuid -> {
+                if (groupData.getLeader().equals(uuid))
                     groupPlayersNbt.putString(uuid.toString(), "LEADER");
                 else
                     groupPlayersNbt.putString(uuid.toString(), "MEMBER");
@@ -50,7 +50,7 @@ public class GroupManager extends PersistentState {
             groupNbt.put("players", groupPlayersNbt);
 
             NbtCompound groupRequestsNbt = new NbtCompound();
-            groupData.requests.forEach((uuid -> groupRequestsNbt.putString(uuid.toString(), ":3")));
+            groupData.getRequests().forEach((uuid -> groupRequestsNbt.putString(uuid.toString(), ":3")));
             groupNbt.put("requests", groupRequestsNbt);
 
             groupsNbt.put(id, groupNbt);
@@ -89,29 +89,15 @@ public class GroupManager extends PersistentState {
 
         NbtCompound groupsNbt = tag.getCompound("groups");
         groupsNbt.getKeys().forEach(key -> {
-            GroupData groupData = new GroupData();
-
-            groupData.name = groupsNbt.getCompound(key).getString("name");
-            groupData.prefix = groupsNbt.getCompound(key).getString("prefix");
-            groupData.listed = groupsNbt.getCompound(key).getBoolean("listed");
-            groupData.open = groupsNbt.getCompound(key).getBoolean("open");
-            groupData.color = groupsNbt.getCompound(key).getInt("color");
-
-            NbtCompound groupPlayersNbt = groupsNbt.getCompound(key).getCompound("players");
-            groupPlayersNbt.getKeys().forEach(playerKey -> {
-                String role = groupPlayersNbt.getString(playerKey);
-                if (role.equals("LEADER")) {
-                    groupData.leader = UUID.fromString(playerKey);
-                    groupData.players.add(UUID.fromString(playerKey));
-                }
-                else {
-                    groupData.players.add(UUID.fromString(playerKey));
-                }
-            });
-
-            NbtCompound groupRequestsNbt = groupsNbt.getCompound(key).getCompound("requests");
-            groupRequestsNbt.getKeys().forEach(playerKey -> groupData.requests.add(UUID.fromString(playerKey)));
-
+            GroupData groupData = new GroupData(
+                    groupsNbt.getCompound(key).getString("name"),
+                    groupsNbt.getCompound(key).getString("prefix"),
+                    groupsNbt.getCompound(key).getInt("color"),
+                    groupsNbt.getCompound(key).getBoolean("listed"),
+                    groupsNbt.getCompound(key).getBoolean("open"),
+                    groupsNbt.getCompound(key).getCompound("players"),
+                    groupsNbt.getCompound(key).getCompound("requests")
+            );
             state.groupList.put(key, groupData);
         });
 
@@ -177,8 +163,12 @@ public class GroupManager extends PersistentState {
     public ArrayList<String> getPrefixArray() {
         ArrayList<String> prefixCache = new ArrayList<>();
         groupList.forEach((name, groupData) -> {
-            prefixCache.add(groupData.prefix);
+            prefixCache.add(groupData.getPrefix());
         });
         return prefixCache;
+    }
+
+    public boolean checkNameValidity(String groupName) {
+        return groupName.length() <= MAX_GROUP_NAME_LENGTH;
     }
 }

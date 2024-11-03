@@ -13,16 +13,16 @@ import ong.aldenw.formats.RgbIntFormat;
 
 public class GroupCreateCommand {
     public static int execute(CommandContext<ServerCommandSource> context) {
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        String groupName = StringArgumentType.getString(context, "groupName");
-        GroupData newGroupData = new GroupData();
-        PlayerData playerState = GroupManager.getPlayerState(player);
-
         if (!context.getSource().isExecutedByPlayer()) {
             context.getSource().sendFeedback(() -> Text.literal("This command is only available to players.").withColor(RgbIntFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
+
+        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        ServerPlayerEntity player = context.getSource().getPlayer();
+        PlayerData playerState = GroupManager.getPlayerState(player);
+        String groupName = StringArgumentType.getString(context, "groupName");
+
         if (!state.players.get(player.getUuid()).groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are already in a group.").withColor(RgbIntFormat.fromThree(255, 0, 0)), false);
             return 1;
@@ -31,16 +31,13 @@ public class GroupCreateCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name already exists.").withColor(RgbIntFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
-        if (groupName.length() > state.MAX_GROUP_NAME_LENGTH) {
+        if (state.checkNameValidity(groupName)) {
             context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 
         playerState.groupName = groupName;
-        newGroupData.name = groupName;
-        newGroupData.leader = player.getUuid();
-        newGroupData.players.add(player.getUuid());
-
+        GroupData newGroupData = new GroupData(groupName, player.getUuid());
         state.groupList.put(groupName, newGroupData);
 
         context.getSource().sendFeedback(() -> Text.literal("Created new group "+groupName).formatted(Formatting.GOLD), false);
