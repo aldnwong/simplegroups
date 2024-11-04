@@ -21,13 +21,9 @@ public abstract class ClientPlayerListMixin {
 	private void injected(CallbackInfoReturnable<Text> cir) {
 		UUID playerUuid = this.getProfile().getId();
 		String playerName = this.getProfile().getName();
-		if (Objects.isNull(ClientCacheManager.playerPrefixDataHashMap.get(playerUuid)) || Objects.isNull(ClientCacheManager.playerColorDataHashMap.get(playerUuid))) {
-			cir.setReturnValue(Text.literal(playerName));
-			return;
-		}
+		String prefix = (!Objects.isNull(ClientCacheManager.playerPrefixDataHashMap.get(playerUuid))) ? ClientCacheManager.playerPrefixDataHashMap.get(playerUuid) : "";
+		int color = (!Objects.isNull(ClientCacheManager.playerColorDataHashMap.get(playerUuid))) ? ClientCacheManager.playerColorDataHashMap.get(playerUuid) : 16777215;
 
-		String prefix = ClientCacheManager.playerPrefixDataHashMap.get(playerUuid);
-		int color = ClientCacheManager.playerColorDataHashMap.get(playerUuid);
 		if (prefix.isEmpty()) {
 			cir.setReturnValue(Text.literal(playerName).withColor(color));
 		}
