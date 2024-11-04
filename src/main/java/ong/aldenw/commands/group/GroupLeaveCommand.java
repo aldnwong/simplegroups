@@ -1,6 +1,5 @@
 package ong.aldenw.commands.group;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -8,7 +7,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import ong.aldenw.GroupManager;
-import ong.aldenw.NetworkManager;
 import ong.aldenw.SimpleGroups;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
