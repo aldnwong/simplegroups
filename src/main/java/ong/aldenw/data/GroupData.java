@@ -149,7 +149,9 @@ public class GroupData {
 
         ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(playerEntity)) {
-            NetworkManager.updateCache(playerEntity, server);
+            if (!prefix.isEmpty())
+                NetworkManager.updatePrefixCache(playerEntity, prefix, server);
+            NetworkManager.updateColorCache(playerEntity, color, server);
         }
     }
 
@@ -164,7 +166,7 @@ public class GroupData {
 
         ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(playerEntity)) {
-            NetworkManager.updateCache(playerEntity, server);
+            NetworkManager.clearCache(playerEntity, server);
         }
     }
 
@@ -176,7 +178,7 @@ public class GroupData {
         players.forEach(groupPlayer -> {
             ServerPlayerEntity onlineGroupPlayer = server.getPlayerManager().getPlayer(groupPlayer);
             if (!Objects.isNull(onlineGroupPlayer)) {
-                NetworkManager.updateCache(onlineGroupPlayer, server);
+                NetworkManager.updateColorCache(onlineGroupPlayer, color, server);
             }
         });
     }
@@ -185,7 +187,7 @@ public class GroupData {
         players.forEach(groupPlayer -> {
             ServerPlayerEntity onlineGroupPlayer = server.getPlayerManager().getPlayer(groupPlayer);
             if (!Objects.isNull(onlineGroupPlayer)) {
-                NetworkManager.updateCache(onlineGroupPlayer, server);
+                NetworkManager.updatePrefixCache(onlineGroupPlayer, prefix, server);
             }
         });
     }

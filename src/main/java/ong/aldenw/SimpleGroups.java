@@ -10,37 +10,47 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import ong.aldenw.data.GroupData;
-import ong.aldenw.network.UpdateDisplayNamePayload;
+import ong.aldenw.data.PlayerData;
+import ong.aldenw.network.ClearCachePayload;
+import ong.aldenw.network.UpdateColorPayload;
+import ong.aldenw.network.UpdatePrefixPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.UUID;
 
 public class SimpleGroups implements ModInitializer {
 	public static final String MOD_ID = "simple-groups";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static final Identifier DISPLAY_NAME_UPDATE = Identifier.of(MOD_ID, "display_name_update");
+	public static final Identifier UPDATE_PREFIX_CACHE = Identifier.of(MOD_ID, "update_prefix_cache");
+	public static final Identifier UPDATE_COLOR_CACHE = Identifier.of(MOD_ID, "update_color_cache");
+	public static final Identifier CLEAR_CACHE = Identifier.of(MOD_ID, "clear_cache");
 
 	@Override
 	public void onInitialize() {
-		PayloadTypeRegistry.playS2C().register(UpdateDisplayNamePayload.ID, UpdateDisplayNamePayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(UpdatePrefixPayload.ID, UpdatePrefixPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(UpdateColorPayload.ID, UpdateColorPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(ClearCachePayload.ID, ClearCachePayload.CODEC);
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			ServerPlayerEntity player = handler.getPlayer();
-			NetworkManager.updateCache(player, server);
-			NetworkManager.updatePlayerCache(player, GroupManager.getServerState(server));
-
 			GroupManager state = GroupManager.getServerState(server);
-			GroupData groupData = state.groupList.get(state.players.get(player.getUuid()).groupName);
+			ServerPlayerEntity player = handler.getPlayer();
+			PlayerData playerData = GroupManager.getPlayerState(player);
+			GroupData groupData = state.groupList.get(playerData.groupName);
 
-			if (!Objects.isNull(groupData) && groupData.getLeader().equals(player.getUuid())) {
-				if (groupData.hasRequests()) {
+			if (!Objects.isNull(groupData)) {
+				if (!groupData.getPrefix().isEmpty())
+					NetworkManager.updatePrefixCache(player, groupData.getPrefix(), server);
+
+				NetworkManager.updateColorCache(player, groupData.getColor(), server);
+
+				if (groupData.getLeader().equals(player.getUuid()) && groupData.hasRequests()) {
 					int requestsSize = groupData.getRequestsSize();
 					player.sendMessage(Text.empty().append(Text.literal("Your group has ").formatted(Formatting.GOLD)).append(Text.literal(requestsSize + "").formatted(Formatting.AQUA)).append(Text.literal((requestsSize == 1) ? " join request!" : "join requests!").formatted(Formatting.GOLD)));
 				}
 			}
+
+			NetworkManager.syncPlayerCache(player);
 		});
 
 		CommandRegistrationCallback.EVENT.register(CommandManager::initialize);
