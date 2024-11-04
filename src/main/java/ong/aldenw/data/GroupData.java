@@ -17,8 +17,8 @@ public class GroupData {
     private int color;
     private int visibility;
     private UUID leader;
-    private final ArrayList<UUID> players;
-    private final ArrayList<UUID> requests;
+    private ArrayList<UUID> players = new ArrayList<>();
+    private ArrayList<UUID> requests = new ArrayList<>();
 
     // New group constructor
     public GroupData(String name, UUID creator) {
@@ -27,9 +27,7 @@ public class GroupData {
         this.color = RgbIntFormat.fromThree(255, 255, 255);
         this.visibility = 0;
         this.leader = creator;
-        this.players = new ArrayList<>();
         this.players.add(creator);
-        this.requests = new ArrayList<>();
     }
 
     // Load from NBT constructor
@@ -38,8 +36,6 @@ public class GroupData {
         this.prefix = provPrefix;
         this.color = provColor;
         this.visibility = visibility;
-        this.players = new ArrayList<>();
-        this.requests = new ArrayList<>();
 
         playersNbt.getKeys().forEach(playerKey -> {
             String role = playersNbt.getString(playerKey);
@@ -142,9 +138,9 @@ public class GroupData {
     }
 
     public void addPlayer(UUID playerUuid, MinecraftServer server) {
+        requests.remove(playerUuid);
         GroupManager state = GroupManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
-        requests.remove(playerUuid);
         if (Objects.isNull(playerData) || !playerData.groupName.isEmpty() || players.contains(playerUuid)) return;
 
         players.add(playerUuid);
@@ -220,10 +216,10 @@ public class GroupData {
     }
 
     public void denyRequest(UUID playerUuid, MinecraftServer server) {
+        requests.remove(playerUuid);
         GroupManager state = GroupManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
 
-        requests.remove(playerUuid);
         if (!playerData.groupName.isEmpty()) return;
 
         ServerPlayerEntity requestingPlayerEntity = server.getPlayerManager().getPlayer(playerUuid);
@@ -233,10 +229,14 @@ public class GroupData {
     }
 
     public void acceptAllRequests(MinecraftServer server) {
-        requests.forEach(requestingUuid -> addPlayer(requestingUuid, server));
+        while(!requests.isEmpty()) {
+            addPlayer(requests.getFirst(), server);
+        }
     }
 
     public void denyAllRequests(MinecraftServer server) {
-        requests.forEach(requestingUuid -> denyRequest(requestingUuid, server));
+        while(!requests.isEmpty()) {
+            denyRequest(requests.getFirst(), server);
+        }
     }
 }

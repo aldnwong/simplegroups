@@ -28,7 +28,7 @@ public class RequestSuggestions implements SuggestionProvider<ServerCommandSourc
         if (!source.isExecutedByPlayer() || playerData.groupName.isEmpty() || !player.getUuid().equals(groupData.getLeader()))
             return builder.buildFuture();
 
-        //if (groupData.getRequestsSize() != 1)
+        if (groupData.getRequestsSize() != 1)
             builder.suggest(ALL_REQUESTS_PARAMETER);
 
         groupData.getRequests().forEach(uuid -> builder.suggest(state.players.get(uuid).username));
