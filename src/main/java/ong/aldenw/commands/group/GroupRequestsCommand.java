@@ -16,8 +16,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class GroupRequestsCommand {
-    // TODO: Optimize mutual variable usage
-
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
             context.getSource().sendFeedback(() -> Text.literal("This command is only available to players").formatted(Formatting.DARK_RED), false);
@@ -26,18 +24,16 @@ public class GroupRequestsCommand {
 
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
-        PlayerData callerData = GroupManager.getPlayerState(caller);
-        GroupData groupData = state.groupList.get(callerData.groupName);
 
-        if (callerData.groupName.isEmpty()) {
+        if (GroupManager.getPlayerState(caller).groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!caller.getUuid().equals(groupData.getLeader())) {
+        if (!caller.getUuid().equals(state.groupList.get(GroupManager.getPlayerState(caller).groupName).getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to view or modify requests for this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!groupData.hasRequests()) {
+        if (!state.groupList.get(GroupManager.getPlayerState(caller).groupName).hasRequests()) {
             context.getSource().sendFeedback(() -> Text.literal("There are no join requests").formatted(Formatting.DARK_RED), false);
             return false;
         }

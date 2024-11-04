@@ -90,7 +90,10 @@ public class GroupData {
 
         this.prefix = prefix;
         updateOnlinePrefixCache(server);
-        notifyOnlineMembers(Text.empty().append(Text.literal("Your group's prefix has changed to ").formatted(Formatting.GOLD)).append(Text.literal(prefix).withColor(color)), server);
+        if (prefix.isEmpty())
+            notifyOnlineMembers(Text.empty().append(Text.literal("Your group's prefix has been removed").formatted(Formatting.GOLD)), server);
+        else
+            notifyOnlineMembers(Text.empty().append(Text.literal("Your group's prefix has changed to ").formatted(Formatting.GOLD)).append(Text.literal(prefix).withColor(color)), server);
     }
 
     public int getColor() {

@@ -14,7 +14,6 @@ import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
 
 public class GroupConfigCommand {
-    // TODO: Optimize mutual variable usage
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
             context.getSource().sendFeedback(() -> Text.literal("This command is only available to players").formatted(Formatting.DARK_RED), false);
@@ -23,14 +22,12 @@ public class GroupConfigCommand {
 
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
         PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerData = GroupManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerData.groupName);
 
-        if (playerData.groupName.isEmpty()) {
+        if (GroupManager.getPlayerState(player).groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!player.getUuid().equals(groupData.getLeader())) {
+        if (!player.getUuid().equals(state.groupList.get(GroupManager.getPlayerState(player).groupName).getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to edit this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
@@ -81,10 +78,9 @@ public class GroupConfigCommand {
         PlayerData playerData = GroupManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         String newPrefix = StringArgumentType.getString(context, "prefix");
-        String oldPrefix = groupData.getPrefix();
 
-        if (newPrefix.equals(oldPrefix)) {
-            if (oldPrefix.isEmpty())
+        if (newPrefix.equals(groupData.getPrefix())) {
+            if (groupData.getPrefix().isEmpty())
                 context.getSource().sendFeedback(() -> Text.literal("Your group's prefix is already empty").formatted(Formatting.YELLOW), false);
             else
                 context.getSource().sendFeedback(() -> Text.literal("Your group already has that prefix").formatted(Formatting.YELLOW), false);
