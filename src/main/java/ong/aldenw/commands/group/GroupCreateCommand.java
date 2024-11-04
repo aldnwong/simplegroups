@@ -31,7 +31,11 @@ public class GroupCreateCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name already exists.").withColor(RgbIntFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
-        if (state.checkNameValidity(groupName)) {
+        if (groupName.length() < state.MIN_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be longer than " + state.MIN_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
+            return 1;
+        }
+        if (groupName.length() > state.MAX_GROUP_NAME_LENGTH) {
             context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
             return 1;
         }

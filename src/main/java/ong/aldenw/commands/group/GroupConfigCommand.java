@@ -4,12 +4,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.NetworkManager;
 import ong.aldenw.GroupManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
@@ -32,7 +30,7 @@ public class GroupConfigCommand {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!player.getUuid().equals(groupData.leader)) {
+        if (!player.getUuid().equals(groupData.getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to edit this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
@@ -49,7 +47,7 @@ public class GroupConfigCommand {
         PlayerData playerData = GroupManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         String newName = StringArgumentType.getString(context, "name");
-        String oldName = groupData.name;
+        String oldName = groupData.getName();
 
         if (newName.equals(oldName)) {
             context.getSource().sendFeedback(() -> Text.literal("Your group already has that name").formatted(Formatting.YELLOW), false);
@@ -59,28 +57,16 @@ public class GroupConfigCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name exists already").formatted(Formatting.DARK_RED), false);
             return 1;
         }
+        if (newName.length() < state.MIN_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be longer than " + state.MIN_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
+            return 1;
+        }
         if (newName.length() > state.MAX_GROUP_NAME_LENGTH) {
             context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 
-        state.groupList.put(newName, groupData);
-        state.groupList.remove(oldName);
-        groupData.name = newName;
-        groupData.players.forEach(uuid -> {
-            state.players.get(uuid).groupName = newName;
-        });
-
-        context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed ").formatted(Formatting.GOLD)).append(Text.literal(oldName).withColor(groupData.color)).append(Text.literal("'s name to ").formatted(Formatting.GOLD)).append(Text.literal(newName).withColor(groupData.color)), false);
-
-        groupData.players.forEach(uuid -> {
-            context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
-                if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
-                    serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's name changed from ").formatted(Formatting.GOLD)).append(Text.literal(oldName).withColor(groupData.color)).append(Text.literal(" to ").formatted(Formatting.GOLD)).append(Text.literal(newName).withColor(groupData.color)));
-                }
-            });
-        });
-        
+        groupData.changeName(newName, context.getSource().getServer());
         return 1;
     }
 
@@ -89,12 +75,13 @@ public class GroupConfigCommand {
             return 1;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        MinecraftServer server = context.getSource().getServer();
+        GroupManager state = GroupManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = GroupManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         String newPrefix = StringArgumentType.getString(context, "prefix");
-        String oldPrefix = groupData.prefix;
+        String oldPrefix = groupData.getPrefix();
 
         if (newPrefix.equals(oldPrefix)) {
             if (oldPrefix.isEmpty())
@@ -107,37 +94,12 @@ public class GroupConfigCommand {
             context.getSource().sendFeedback(() -> Text.literal("Prefix must be shorter than " + state.MAX_PREFIX_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
             return 1;
         }
-        if (state.getPrefixArray().contains(newPrefix)) {
+        if (state.isPrefixInUse(newPrefix)) {
             context.getSource().sendFeedback(() -> Text.literal("A different group is already using that prefix").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 
-        groupData.prefix = newPrefix;
-        if (oldPrefix.isEmpty()) {
-            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed prefix to ").formatted(Formatting.GOLD)).append(Text.literal(newPrefix).withColor(groupData.color)), false);
-
-            groupData.players.forEach(uuid -> {
-                context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
-                    if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
-                        serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's prefix has changed to ").formatted(Formatting.GOLD)).append(Text.literal(newPrefix).withColor(groupData.color)));
-                    }
-                });
-            });
-        }
-        else {
-            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed prefix from ").formatted(Formatting.GOLD)).append(Text.literal(oldPrefix).withColor(groupData.color)).append(Text.literal(" to ").formatted(Formatting.GOLD)).append(Text.literal(newPrefix).withColor(groupData.color)), false);
-
-            groupData.players.forEach(uuid -> {
-                context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
-                    if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
-                        serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's prefix has changed from ").formatted(Formatting.GOLD)).append(Text.literal(oldPrefix).withColor(groupData.color)).append(Text.literal(" to ").formatted(Formatting.GOLD)).append(Text.literal(newPrefix).withColor(groupData.color)));
-                    }
-                });
-            });
-        }
-
-        NetworkManager.updateCache(groupData, context.getSource().getServer());
-
+        groupData.changePrefix(newPrefix, server);
         return 1;
     }
 
@@ -146,39 +108,26 @@ public class GroupConfigCommand {
             return 1;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        MinecraftServer server = context.getSource().getServer();
+        GroupManager state = GroupManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = GroupManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         int r = IntegerArgumentType.getInteger(context, "r");
         int g = IntegerArgumentType.getInteger(context, "g");
         int b = IntegerArgumentType.getInteger(context, "b");
-        int newColor = RgbIntFormat.fromThree(r, g, b);
-        int oldColor = groupData.color;
-
+        int rgb = RgbIntFormat.fromThree(r, g, b);
 
         if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
             context.getSource().sendFeedback(() -> Text.literal("Invalid color. Values must be from 0-255").formatted(Formatting.DARK_RED), false);
             return 1;
         }
-        if (groupData.color == RgbIntFormat.fromThree(r, g, b)) {
+        if (groupData.getColor() == rgb) {
             context.getSource().sendFeedback(() -> Text.literal("Your group already has this color").formatted(Formatting.YELLOW), false);
             return 1;
         }
 
-        groupData.color = RgbIntFormat.fromThree(r, g, b);
-        context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Changed color from ").formatted(Formatting.GOLD)).append(Text.literal("this").withColor(oldColor)).append(Text.literal(" to ").formatted(Formatting.GOLD)).append(Text.literal("this").withColor(newColor)), false);
-
-        groupData.players.forEach(uuid -> {
-            context.getSource().getServer().getPlayerManager().getPlayerList().forEach(serverPlayer -> {
-                if (serverPlayer.getUuid().equals(uuid) && !player.getUuid().equals(uuid)) {
-                    serverPlayer.sendMessage(Text.empty().append(Text.literal("Your group's color has changed from ").formatted(Formatting.GOLD)).append(Text.literal("this").withColor(oldColor)).append(Text.literal(" to ").formatted(Formatting.GOLD)).append(Text.literal("this").withColor(newColor)));
-                }
-            });
-        });
-
-        NetworkManager.updateCache(groupData, context.getSource().getServer());
-
+        groupData.changeColor(rgb, server);
         return 1;
     }
 
@@ -187,55 +136,39 @@ public class GroupConfigCommand {
             return 1;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        MinecraftServer server = context.getSource().getServer();
+        GroupManager state = GroupManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = GroupManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
-        String option = StringArgumentType.getString(context, "joinOption");
 
-        switch (option) {
+        switch (StringArgumentType.getString(context, "joinOption")) {
             case "byInviteOnly":
-                if (!groupData.listed && !groupData.open) {
+                if (groupData.getVisibility() == 0)
                     context.getSource().sendFeedback(() -> Text.literal("Your group is already set to invite only").formatted(Formatting.YELLOW), false);
-                }
-                else {
-                    groupData.listed = false;
-                    groupData.open = false;
-                    context.getSource().sendFeedback(() -> Text.literal("Your group is now invite only").formatted(Formatting.GOLD), false);
-                }
+                else
+                    groupData.setVisibility(0, server);
                 break;
+
             case "anyoneCanRequest":
-                if (groupData.listed && !groupData.open) {
+                if (groupData.getVisibility() == 1)
                     context.getSource().sendFeedback(() -> Text.literal("Your group is already set to request and invite only").formatted(Formatting.YELLOW), false);
-                }
-                else {
-                    groupData.listed = true;
-                    groupData.open = false;
-                    context.getSource().sendFeedback(() -> Text.literal("Your group is now request and invite only").formatted(Formatting.GOLD), false);
-                }
+                else
+                    groupData.setVisibility(1, server);
                 break;
+
             case "anyoneCanJoin":
-                if (groupData.listed && groupData.open) {
+                if (groupData.getVisibility() == 2)
                     context.getSource().sendFeedback(() -> Text.literal("Your group is already publicly joinable").formatted(Formatting.YELLOW), false);
-                }
-                else {
-                    groupData.listed = true;
-                    groupData.open = true;
-                    context.getSource().sendFeedback(() -> Text.literal("Your group is now publicly joinable").formatted(Formatting.GOLD), false);
-                    if (!groupData.requests.isEmpty()) {
-                        if (groupData.requests.size() == 1)
-                            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("There is 1 request to join the group.").formatted(Formatting.GRAY)).append(Text.literal("Would you like to add these players to the group?").formatted(Formatting.GOLD)), false);
-                        else
-                            context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("There are " + groupData.requests.size() + " requests to join the group.").formatted(Formatting.GRAY)).append(Text.literal(" Would you like to add these players to the group?").formatted(Formatting.GOLD)), false);
-                        context.getSource().sendFeedback(() -> Text.literal("[YES]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/group requests accept @all"))).formatted(Formatting.GREEN), false);
-                        context.getSource().sendFeedback(() -> Text.literal("[NO]").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/group requests deny @all"))).formatted(Formatting.RED), false);
-                    }
-                }
+                else
+                    groupData.setVisibility(2, server);
                 break;
+
             default:
                 context.getSource().sendFeedback(() -> Text.literal("Invalid option").formatted(Formatting.DARK_RED), false);
                 break;
         }
+
         return 1;
     }
 }

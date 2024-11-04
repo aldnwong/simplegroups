@@ -16,8 +16,8 @@ public class GroupSuggestions implements SuggestionProvider<ServerCommandSource>
         GroupManager state = GroupManager.getServerState(context.getSource().getServer());
 
         state.groupList.forEach((id, groupData) -> {
-            if (groupData.listed) {
-                builder.suggest(groupData.name);
+            if (groupData.getVisibility() != 0) {
+                builder.suggest(groupData.getName());
             }
         });
 

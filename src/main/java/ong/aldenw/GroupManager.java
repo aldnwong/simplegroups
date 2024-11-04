@@ -16,10 +16,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class GroupManager extends PersistentState {
+    // TODO: Make variables private and only access/modify through accessor and modifier methods
     public int MAX_GROUP_NAME_LENGTH = 25;
+    public int MIN_GROUP_NAME_LENGTH = 1;
     public int MAX_PREFIX_NAME_LENGTH = 20;
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
+
+    // TODO: Move playerUuids to different NBT
     public HashMap<String, UUID> playerUuids = new HashMap<>();
 
     private static final Type<GroupManager> type = new Type<>(
@@ -36,8 +40,7 @@ public class GroupManager extends PersistentState {
 
             groupNbt.putString("name", groupData.getName());
             groupNbt.putString("prefix", groupData.getPrefix());
-            groupNbt.putBoolean("listed", groupData.isListed());
-            groupNbt.putBoolean("open", groupData.isOpen());
+            groupNbt.putInt("visibility", groupData.getVisibility());
             groupNbt.putInt("color", groupData.getColor());
 
             NbtCompound groupPlayersNbt = new NbtCompound();
@@ -69,9 +72,7 @@ public class GroupManager extends PersistentState {
         nbt.put("players", playersNbt);
 
         NbtCompound playerUuidsNbt = new NbtCompound();
-        playerUuids.forEach(((username, uuid) -> {
-            playerUuidsNbt.putString(username, uuid.toString());
-        }));
+        playerUuids.forEach(((username, uuid) -> playerUuidsNbt.putString(username, uuid.toString())));
 
         nbt.put("playerUuids", playerUuidsNbt);
 
@@ -93,8 +94,7 @@ public class GroupManager extends PersistentState {
                     groupsNbt.getCompound(key).getString("name"),
                     groupsNbt.getCompound(key).getString("prefix"),
                     groupsNbt.getCompound(key).getInt("color"),
-                    groupsNbt.getCompound(key).getBoolean("listed"),
-                    groupsNbt.getCompound(key).getBoolean("open"),
+                    groupsNbt.getCompound(key).getInt("visibility"),
                     groupsNbt.getCompound(key).getCompound("players"),
                     groupsNbt.getCompound(key).getCompound("requests")
             );
@@ -113,17 +113,13 @@ public class GroupManager extends PersistentState {
         });
 
         NbtCompound playerUuidsNbt = tag.getCompound("playerUuids");
-        playerUuidsNbt.getKeys().forEach(key -> {
-            state.playerUuids.put(key, UUID.fromString(playerUuidsNbt.getString(key)));
-        });
+        playerUuidsNbt.getKeys().forEach(key -> state.playerUuids.put(key, UUID.fromString(playerUuidsNbt.getString(key))));
 
         NbtCompound globalConfig = tag.getCompound("globalConfig");
         int maxGroupNameNbt = globalConfig.getInt("maxGroupNameLength");
         int maxPrefixNameNbt = globalConfig.getInt("maxPrefixNameLength");
         state.MAX_GROUP_NAME_LENGTH = (maxGroupNameNbt > 0) ? maxGroupNameNbt : 25;
         state.MAX_PREFIX_NAME_LENGTH = (maxPrefixNameNbt > 0) ? maxPrefixNameNbt : 20;
-
-        NetworkManager.createCache(state);
 
         return state;
     }
@@ -160,15 +156,20 @@ public class GroupManager extends PersistentState {
         return playerData;
     }
 
-    public ArrayList<String> getPrefixArray() {
-        ArrayList<String> prefixCache = new ArrayList<>();
-        groupList.forEach((name, groupData) -> {
-            prefixCache.add(groupData.getPrefix());
-        });
-        return prefixCache;
+    public boolean isPrefixValid(String prefix) {
+        if (prefix.length() > MAX_PREFIX_NAME_LENGTH || isPrefixInUse(prefix))
+            return false;
+
+        return true;
     }
 
-    public boolean checkNameValidity(String groupName) {
-        return groupName.length() <= MAX_GROUP_NAME_LENGTH;
+    public boolean isPrefixInUse(String prefix) {
+        ArrayList<String> prefixCache = new ArrayList<>();
+        groupList.forEach((name, groupData) -> prefixCache.add(groupData.getPrefix()));
+        return prefixCache.contains(prefix);
+    }
+
+    public boolean isNameValid(String groupName) {
+        return groupName.length() > MIN_GROUP_NAME_LENGTH && groupName.length() <= MAX_GROUP_NAME_LENGTH && !groupName.isEmpty() && !groupList.containsKey(groupName);
     }
 }
