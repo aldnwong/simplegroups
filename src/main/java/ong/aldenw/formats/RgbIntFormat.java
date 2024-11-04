@@ -12,4 +12,12 @@ public class RgbIntFormat {
             color = RGB_INT_MIN;
         return color;
     }
+
+    public static int boundInt(int color) {
+        if (color > RGB_INT_MAX)
+            color = RGB_INT_MAX;
+        if (color < RGB_INT_MIN)
+            color = RGB_INT_MIN;
+        return color;
+    }
 }
