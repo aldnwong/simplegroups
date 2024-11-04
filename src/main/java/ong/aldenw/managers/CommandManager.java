@@ -1,4 +1,4 @@
-package ong.aldenw;
+package ong.aldenw.managers;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandRegistryAccess;

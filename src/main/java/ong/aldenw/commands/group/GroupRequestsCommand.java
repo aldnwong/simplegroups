@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.GroupManager;
+import ong.aldenw.managers.NbtManager;
 import ong.aldenw.commands.suggestions.RequestSuggestions;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
@@ -22,18 +22,18 @@ public class GroupRequestsCommand {
             return false;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
 
-        if (GroupManager.getPlayerState(caller).groupName.isEmpty()) {
+        if (NbtManager.getPlayerState(caller).groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!caller.getUuid().equals(state.groupList.get(GroupManager.getPlayerState(caller).groupName).getLeader())) {
+        if (!caller.getUuid().equals(state.groupList.get(NbtManager.getPlayerState(caller).groupName).getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to view or modify requests for this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!state.groupList.get(GroupManager.getPlayerState(caller).groupName).hasRequests()) {
+        if (!state.groupList.get(NbtManager.getPlayerState(caller).groupName).hasRequests()) {
             context.getSource().sendFeedback(() -> Text.literal("There are no join requests").formatted(Formatting.DARK_RED), false);
             return false;
         }
@@ -42,9 +42,9 @@ public class GroupRequestsCommand {
 
     public static boolean checkArgumentRequirements(CommandContext<ServerCommandSource> context) {
         String playerArg = StringArgumentType.getString(context, "player");
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
-        PlayerData callerData = GroupManager.getPlayerState(caller);
+        PlayerData callerData = NbtManager.getPlayerState(caller);
         GroupData groupData = state.groupList.get(callerData.groupName);
         UUID playerUuid = state.playerUuids.get(playerArg);
 
@@ -61,9 +61,9 @@ public class GroupRequestsCommand {
             return 1;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
-        PlayerData callerData = GroupManager.getPlayerState(caller);
+        PlayerData callerData = NbtManager.getPlayerState(caller);
         GroupData groupData = state.groupList.get(callerData.groupName);
 
         if (!groupData.hasRequests()) {
@@ -81,9 +81,9 @@ public class GroupRequestsCommand {
 
     public static int acceptExecute(CommandContext<ServerCommandSource> context) {
         MinecraftServer server = context.getSource().getServer();
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         String playerArg = StringArgumentType.getString(context, "player");
-        GroupData groupData = state.groupList.get(GroupManager.getPlayerState(context.getSource().getPlayer()).groupName);
+        GroupData groupData = state.groupList.get(NbtManager.getPlayerState(context.getSource().getPlayer()).groupName);
 
         if (!checkExecuteRequirements(context))
             return 1;
@@ -106,8 +106,8 @@ public class GroupRequestsCommand {
 
     public static int denyExecute(CommandContext<ServerCommandSource> context) {
         MinecraftServer server = context.getSource().getServer();
-        GroupManager state = GroupManager.getServerState(server);
-        GroupData groupData = state.groupList.get(GroupManager.getPlayerState(context.getSource().getPlayer()).groupName);
+        NbtManager state = NbtManager.getServerState(server);
+        GroupData groupData = state.groupList.get(NbtManager.getPlayerState(context.getSource().getPlayer()).groupName);
         String playerArg = StringArgumentType.getString(context, "player");
         if (!checkExecuteRequirements(context))
             return 1;

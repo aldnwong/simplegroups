@@ -1,4 +1,4 @@
-package ong.aldenw;
+package ong.aldenw.managers;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.*;
@@ -7,28 +7,24 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
+import ong.aldenw.SimpleGroups;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
+import ong.aldenw.formats.GroupFormat;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
-public class GroupManager extends PersistentState {
+public class NbtManager extends PersistentState {
     // TODO: Make variables private and only access/modify through accessor and modifier methods
-    public int MAX_GROUP_NAME_LENGTH = 25;
-    public int MIN_GROUP_NAME_LENGTH = 1;
-    public int MAX_PREFIX_NAME_LENGTH = 20;
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
-
-    // TODO: Move playerUuids to different NBT
     public HashMap<String, UUID> playerUuids = new HashMap<>();
 
-    private static final Type<GroupManager> type = new Type<>(
-            GroupManager::new,
-            GroupManager::createFromNbt,
+    private static final Type<NbtManager> type = new Type<>(
+            NbtManager::new,
+            NbtManager::createFromNbt,
             null
     );
 
@@ -77,16 +73,16 @@ public class GroupManager extends PersistentState {
         nbt.put("playerUuids", playerUuidsNbt);
 
         NbtCompound groupGlobalConfig = new NbtCompound();
-        groupGlobalConfig.putInt("maxGroupNameLength", MAX_GROUP_NAME_LENGTH);
-        groupGlobalConfig.putInt("maxPrefixNameLength", MAX_PREFIX_NAME_LENGTH);
+        groupGlobalConfig.putInt("maxGroupNameLength", GroupFormat.MAX_GROUP_NAME_LENGTH);
+        groupGlobalConfig.putInt("maxPrefixNameLength", GroupFormat.MAX_PREFIX_NAME_LENGTH);
 
         nbt.put("globalConfig", groupGlobalConfig);
 
         return nbt;
     }
 
-    public static GroupManager createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
-        GroupManager state = new GroupManager();
+    public static NbtManager createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
+        NbtManager state = new NbtManager();
 
         NbtCompound groupsNbt = tag.getCompound("groups");
         groupsNbt.getKeys().forEach(key -> {
@@ -118,21 +114,21 @@ public class GroupManager extends PersistentState {
         NbtCompound globalConfig = tag.getCompound("globalConfig");
         int maxGroupNameNbt = globalConfig.getInt("maxGroupNameLength");
         int maxPrefixNameNbt = globalConfig.getInt("maxPrefixNameLength");
-        state.MAX_GROUP_NAME_LENGTH = (maxGroupNameNbt > 0) ? maxGroupNameNbt : 25;
-        state.MAX_PREFIX_NAME_LENGTH = (maxPrefixNameNbt > 0) ? maxPrefixNameNbt : 20;
+        GroupFormat.MAX_GROUP_NAME_LENGTH = (maxGroupNameNbt > 0) ? maxGroupNameNbt : 25;
+        GroupFormat.MAX_PREFIX_NAME_LENGTH = (maxPrefixNameNbt > 0) ? maxPrefixNameNbt : 20;
 
         return state;
     }
 
-    public static GroupManager getServerState(MinecraftServer server) {
+    public static NbtManager getServerState(MinecraftServer server) {
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
-        GroupManager state = persistentStateManager.getOrCreate(type, SimpleGroups.MOD_ID);
+        NbtManager state = persistentStateManager.getOrCreate(type, SimpleGroups.MOD_ID);
         state.markDirty();
         return state;
     }
 
     public static PlayerData getPlayerState(LivingEntity player) {
-        GroupManager serverState = getServerState(player.getWorld().getServer());
+        NbtManager serverState = getServerState(player.getWorld().getServer());
         String playerName = player.getName().getString();
         if (!serverState.playerUuids.containsKey(playerName) || !serverState.playerUuids.get(playerName).equals(player.getUuid())) {
             serverState.playerUuids.put(playerName, player.getUuid());
@@ -148,28 +144,11 @@ public class GroupManager extends PersistentState {
     }
 
     public static PlayerData getPlayerState(UUID playerUuid, MinecraftServer server) {
-        GroupManager serverState = getServerState(server);
+        NbtManager serverState = getServerState(server);
         PlayerData playerData = serverState.players.computeIfAbsent(playerUuid, uuid -> new PlayerData());
         if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {
             playerData.groupName = "";
         }
         return playerData;
-    }
-
-    public boolean isPrefixValid(String prefix) {
-        if (prefix.length() > MAX_PREFIX_NAME_LENGTH || isPrefixInUse(prefix))
-            return false;
-
-        return true;
-    }
-
-    public boolean isPrefixInUse(String prefix) {
-        ArrayList<String> prefixCache = new ArrayList<>();
-        groupList.forEach((name, groupData) -> prefixCache.add(groupData.getPrefix()));
-        return prefixCache.contains(prefix);
-    }
-
-    public boolean isNameValid(String groupName) {
-        return groupName.length() > MIN_GROUP_NAME_LENGTH && groupName.length() <= MAX_GROUP_NAME_LENGTH && !groupName.isEmpty() && !groupList.containsKey(groupName);
     }
 }

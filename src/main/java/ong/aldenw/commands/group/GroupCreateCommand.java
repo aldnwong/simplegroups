@@ -6,7 +6,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.GroupManager;
+import ong.aldenw.formats.GroupFormat;
+import ong.aldenw.managers.NbtManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
@@ -18,9 +19,9 @@ public class GroupCreateCommand {
             return 1;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         ServerPlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerState = GroupManager.getPlayerState(player);
+        PlayerData playerState = NbtManager.getPlayerState(player);
         String groupName = StringArgumentType.getString(context, "groupName");
 
         if (!state.players.get(player.getUuid()).groupName.isEmpty()) {
@@ -31,12 +32,12 @@ public class GroupCreateCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name already exists.").withColor(RgbIntFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
-        if (groupName.length() < state.MIN_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be longer than " + state.MIN_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
+        if (groupName.length() < GroupFormat.MIN_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be longer than " + GroupFormat.MIN_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
             return 1;
         }
-        if (groupName.length() > state.MAX_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
+        if (groupName.length() > GroupFormat.MAX_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + GroupFormat.MAX_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 

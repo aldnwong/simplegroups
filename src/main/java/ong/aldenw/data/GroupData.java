@@ -5,8 +5,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.GroupManager;
-import ong.aldenw.NetworkManager;
+import ong.aldenw.formats.GroupFormat;
+import ong.aldenw.managers.NbtManager;
+import ong.aldenw.managers.NetworkManager;
 import ong.aldenw.formats.RgbIntFormat;
 
 import java.util.*;
@@ -69,8 +70,8 @@ public class GroupData {
     }
 
     public void changeName(String name, MinecraftServer server) {
-        GroupManager state = GroupManager.getServerState(server);
-        if (this.name.equals(name) || state.isNameValid(name)) return;
+        NbtManager state = NbtManager.getServerState(server);
+        if (this.name.equals(name) || GroupFormat.isNameValid(name, state)) return;
 
         state.groupList.remove(this.name);
         state.groupList.put(name, this);
@@ -85,8 +86,8 @@ public class GroupData {
     }
 
     public void changePrefix(String prefix, MinecraftServer server) {
-        GroupManager state = GroupManager.getServerState(server);
-        if (this.prefix.equals(prefix) || !state.isPrefixValid(prefix)) return;
+        NbtManager state = NbtManager.getServerState(server);
+        if (this.prefix.equals(prefix) || !GroupFormat.isPrefixValid(prefix, state)) return;
 
         this.prefix = prefix;
         updateOnlinePrefixCache(server);
@@ -133,7 +134,7 @@ public class GroupData {
         if (leader.equals(uuid) || !players.contains(uuid)) return;
 
         this.leader = uuid;
-        notifyOnlineMembers(Text.empty().append(Text.literal("Your group's leader has changed to ").formatted(Formatting.GOLD)).append(Text.literal(GroupManager.getPlayerState(uuid, server).username).withColor(color)), server);
+        notifyOnlineMembers(Text.empty().append(Text.literal("Your group's leader has changed to ").formatted(Formatting.GOLD)).append(Text.literal(NbtManager.getPlayerState(uuid, server).username).withColor(color)), server);
     }
 
     public List<UUID> getPlayers() {
@@ -142,7 +143,7 @@ public class GroupData {
 
     public void addPlayer(UUID playerUuid, MinecraftServer server) {
         requests.remove(playerUuid);
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
         if (Objects.isNull(playerData) || !playerData.groupName.isEmpty() || players.contains(playerUuid)) return;
 
@@ -159,7 +160,7 @@ public class GroupData {
     }
 
     public void removePlayer(UUID playerUuid, MinecraftServer server) {
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
         if (leader.equals(playerUuid) || Objects.isNull(playerData) || !playerData.groupName.equals(name)) return;
 
@@ -212,7 +213,7 @@ public class GroupData {
     }
 
     public void addRequest(UUID playerUuid, MinecraftServer server) {
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
         if (requests.contains(playerUuid) || players.contains(playerUuid) || visibility != 1 || !playerData.groupName.isEmpty()) return;
 
@@ -222,7 +223,7 @@ public class GroupData {
 
     public void denyRequest(UUID playerUuid, MinecraftServer server) {
         requests.remove(playerUuid);
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
 
         if (!playerData.groupName.isEmpty()) return;

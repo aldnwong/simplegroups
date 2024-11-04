@@ -8,7 +8,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.GroupManager;
+import ong.aldenw.formats.GroupFormat;
+import ong.aldenw.managers.NbtManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
@@ -20,14 +21,14 @@ public class GroupConfigCommand {
             return false;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity player = context.getSource().getPlayer();
 
-        if (GroupManager.getPlayerState(player).groupName.isEmpty()) {
+        if (NbtManager.getPlayerState(player).groupName.isEmpty()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!player.getUuid().equals(state.groupList.get(GroupManager.getPlayerState(player).groupName).getLeader())) {
+        if (!player.getUuid().equals(state.groupList.get(NbtManager.getPlayerState(player).groupName).getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to edit this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
@@ -39,9 +40,9 @@ public class GroupConfigCommand {
             return 1;
         }
 
-        GroupManager state = GroupManager.getServerState(context.getSource().getServer());
+        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerData = GroupManager.getPlayerState(player);
+        PlayerData playerData = NbtManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         String newName = StringArgumentType.getString(context, "name");
         String oldName = groupData.getName();
@@ -54,12 +55,12 @@ public class GroupConfigCommand {
             context.getSource().sendFeedback(() -> Text.literal("A group with this name exists already").formatted(Formatting.DARK_RED), false);
             return 1;
         }
-        if (newName.length() < state.MIN_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be longer than " + state.MIN_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
+        if (newName.length() < GroupFormat.MIN_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be longer than " + GroupFormat.MIN_GROUP_NAME_LENGTH + " characters.").formatted(Formatting.DARK_RED), false);
             return 1;
         }
-        if (newName.length() > state.MAX_GROUP_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + state.MAX_GROUP_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
+        if (newName.length() > GroupFormat.MAX_GROUP_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + GroupFormat.MAX_GROUP_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 
@@ -73,9 +74,9 @@ public class GroupConfigCommand {
         }
 
         MinecraftServer server = context.getSource().getServer();
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerData = GroupManager.getPlayerState(player);
+        PlayerData playerData = NbtManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         String newPrefix = StringArgumentType.getString(context, "prefix");
 
@@ -86,11 +87,11 @@ public class GroupConfigCommand {
                 context.getSource().sendFeedback(() -> Text.literal("Your group already has that prefix").formatted(Formatting.YELLOW), false);
             return 1;
         }
-        if (newPrefix.length() > state.MAX_PREFIX_NAME_LENGTH) {
-            context.getSource().sendFeedback(() -> Text.literal("Prefix must be shorter than " + state.MAX_PREFIX_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
+        if (newPrefix.length() > GroupFormat.MAX_PREFIX_NAME_LENGTH) {
+            context.getSource().sendFeedback(() -> Text.literal("Prefix must be shorter than " + GroupFormat.MAX_PREFIX_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
             return 1;
         }
-        if (state.isPrefixInUse(newPrefix)) {
+        if (GroupFormat.isPrefixInUse(newPrefix, state)) {
             context.getSource().sendFeedback(() -> Text.literal("A different group is already using that prefix").formatted(Formatting.DARK_RED), false);
             return 1;
         }
@@ -105,9 +106,9 @@ public class GroupConfigCommand {
         }
 
         MinecraftServer server = context.getSource().getServer();
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerData = GroupManager.getPlayerState(player);
+        PlayerData playerData = NbtManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
         int r = IntegerArgumentType.getInteger(context, "r");
         int g = IntegerArgumentType.getInteger(context, "g");
@@ -133,9 +134,9 @@ public class GroupConfigCommand {
         }
 
         MinecraftServer server = context.getSource().getServer();
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerData = GroupManager.getPlayerState(player);
+        PlayerData playerData = NbtManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
 
         switch (StringArgumentType.getString(context, "joinOption")) {

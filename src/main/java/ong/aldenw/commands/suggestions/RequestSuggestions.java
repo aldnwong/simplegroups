@@ -8,7 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
-import ong.aldenw.GroupManager;
+import ong.aldenw.managers.NbtManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 
@@ -20,9 +20,9 @@ public class RequestSuggestions implements SuggestionProvider<ServerCommandSourc
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
         MinecraftServer server = source.getServer();
-        GroupManager state = GroupManager.getServerState(server);
+        NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = source.getPlayer();
-        PlayerData playerData = GroupManager.getPlayerState(player);
+        PlayerData playerData = NbtManager.getPlayerState(player);
         GroupData groupData = state.groupList.get(playerData.groupName);
 
         if (!source.isExecutedByPlayer() || playerData.groupName.isEmpty() || !player.getUuid().equals(groupData.getLeader()))

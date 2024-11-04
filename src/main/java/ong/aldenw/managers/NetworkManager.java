@@ -1,4 +1,4 @@
-package ong.aldenw;
+package ong.aldenw.managers;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
