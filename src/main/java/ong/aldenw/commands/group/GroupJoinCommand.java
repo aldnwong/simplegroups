@@ -26,7 +26,7 @@ public class GroupJoinCommand {
         String groupName = StringArgumentType.getString(context, "groupName");
         GroupData groupState = state.groupList.get(groupName);
 
-        if (!playerState.groupName.isEmpty()) {
+        if (playerState.isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal("You are already in a group").formatted(Formatting.DARK_RED), false);
             return 1;
         }

@@ -25,15 +25,15 @@ public class GroupRequestsCommand {
         NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
 
-        if (NbtManager.getPlayerState(caller).groupName.isEmpty()) {
+        if (!NbtManager.getPlayerState(caller).isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!caller.getUuid().equals(state.groupList.get(NbtManager.getPlayerState(caller).groupName).getLeader())) {
+        if (!caller.getUuid().equals(state.groupList.get(NbtManager.getPlayerState(caller).getGroupName()).getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to view or modify requests for this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!state.groupList.get(NbtManager.getPlayerState(caller).groupName).hasRequests()) {
+        if (!state.groupList.get(NbtManager.getPlayerState(caller).getGroupName()).hasRequests()) {
             context.getSource().sendFeedback(() -> Text.literal("There are no join requests").formatted(Formatting.DARK_RED), false);
             return false;
         }
@@ -45,7 +45,7 @@ public class GroupRequestsCommand {
         NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
         PlayerData callerData = NbtManager.getPlayerState(caller);
-        GroupData groupData = state.groupList.get(callerData.groupName);
+        GroupData groupData = state.groupList.get(callerData.getGroupName());
         UUID playerUuid = state.playerUuids.get(playerArg);
 
         if (Objects.isNull(playerUuid) || !groupData.requestsContains(playerUuid)) {
@@ -64,7 +64,7 @@ public class GroupRequestsCommand {
         NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity caller = context.getSource().getPlayer();
         PlayerData callerData = NbtManager.getPlayerState(caller);
-        GroupData groupData = state.groupList.get(callerData.groupName);
+        GroupData groupData = state.groupList.get(callerData.getGroupName());
 
         if (!groupData.hasRequests()) {
             context.getSource().sendFeedback(() -> Text.literal("There are no join requests").formatted(Formatting.DARK_RED), false);
@@ -74,7 +74,7 @@ public class GroupRequestsCommand {
         int requestsSize = groupData.getRequestsSize();
         context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("\n").append(Text.literal("There " + ((requestsSize ==1) ? "is" : "are") + " " + requestsSize + " join " + ((requestsSize ==1) ? "request" : "requests") +":").formatted(Formatting.GOLD))), false);
 
-        groupData.getRequests().forEach(uuid -> context.getSource().sendFeedback(() -> Text.literal(state.players.get(uuid).username).formatted(Formatting.YELLOW), false));
+        groupData.getRequests().forEach(uuid -> context.getSource().sendFeedback(() -> Text.literal(state.players.get(uuid).getUsername()).formatted(Formatting.YELLOW), false));
 
         return 1;
     }
@@ -83,7 +83,7 @@ public class GroupRequestsCommand {
         MinecraftServer server = context.getSource().getServer();
         NbtManager state = NbtManager.getServerState(server);
         String playerArg = StringArgumentType.getString(context, "player");
-        GroupData groupData = state.groupList.get(NbtManager.getPlayerState(context.getSource().getPlayer()).groupName);
+        GroupData groupData = state.groupList.get(NbtManager.getPlayerState(context.getSource().getPlayer()).getGroupName());
 
         if (!checkExecuteRequirements(context))
             return 1;
@@ -107,7 +107,7 @@ public class GroupRequestsCommand {
     public static int denyExecute(CommandContext<ServerCommandSource> context) {
         MinecraftServer server = context.getSource().getServer();
         NbtManager state = NbtManager.getServerState(server);
-        GroupData groupData = state.groupList.get(NbtManager.getPlayerState(context.getSource().getPlayer()).groupName);
+        GroupData groupData = state.groupList.get(NbtManager.getPlayerState(context.getSource().getPlayer()).getGroupName());
         String playerArg = StringArgumentType.getString(context, "player");
         if (!checkExecuteRequirements(context))
             return 1;

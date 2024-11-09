@@ -24,11 +24,11 @@ public class GroupConfigCommand {
         NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity player = context.getSource().getPlayer();
 
-        if (NbtManager.getPlayerState(player).groupName.isEmpty()) {
+        if (!NbtManager.getPlayerState(player).isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not in a group").formatted(Formatting.DARK_RED), false);
             return false;
         }
-        if (!player.getUuid().equals(state.groupList.get(NbtManager.getPlayerState(player).groupName).getLeader())) {
+        if (!player.getUuid().equals(state.groupList.get(NbtManager.getPlayerState(player).getGroupName()).getLeader())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to edit this group").formatted(Formatting.DARK_RED), false);
             return false;
         }
@@ -43,7 +43,7 @@ public class GroupConfigCommand {
         NbtManager state = NbtManager.getServerState(context.getSource().getServer());
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = NbtManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerData.groupName);
+        GroupData groupData = state.groupList.get(playerData.getGroupName());
         String newName = StringArgumentType.getString(context, "name");
         String oldName = groupData.getName();
 
@@ -77,7 +77,7 @@ public class GroupConfigCommand {
         NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = NbtManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerData.groupName);
+        GroupData groupData = state.groupList.get(playerData.getGroupName());
         String newPrefix = StringArgumentType.getString(context, "prefix");
 
         if (newPrefix.equals(groupData.getPrefix())) {
@@ -109,7 +109,7 @@ public class GroupConfigCommand {
         NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = NbtManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerData.groupName);
+        GroupData groupData = state.groupList.get(playerData.getGroupName());
         int r = IntegerArgumentType.getInteger(context, "r");
         int g = IntegerArgumentType.getInteger(context, "g");
         int b = IntegerArgumentType.getInteger(context, "b");
@@ -137,7 +137,7 @@ public class GroupConfigCommand {
         NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerData = NbtManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerData.groupName);
+        GroupData groupData = state.groupList.get(playerData.getGroupName());
 
         switch (StringArgumentType.getString(context, "joinOption")) {
             case "byInviteOnly":

@@ -24,15 +24,15 @@ public class GroupLeaveCommand {
         NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
         PlayerData playerState = NbtManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerState.groupName);
+        GroupData groupData = state.groupList.get(playerState.getGroupName());
 
-        if (playerState.groupName.isEmpty()) {
+        if (!playerState.isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal("You are not currently in a group").formatted(Formatting.DARK_RED), false);
             return 1;
         }
         if (Objects.isNull(groupData)) {
             context.getSource().sendFeedback(() -> Text.literal("Left group").formatted(Formatting.YELLOW), false);
-            playerState.groupName = "";
+            playerState.leaveGroup();
             SimpleGroups.LOGGER.warn("Player is in group that doesn't exist (GROUP.LEAVE.EXECUTE)");
             return 1;
         }

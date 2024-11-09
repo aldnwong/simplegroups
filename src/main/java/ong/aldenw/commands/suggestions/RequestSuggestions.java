@@ -23,15 +23,15 @@ public class RequestSuggestions implements SuggestionProvider<ServerCommandSourc
         NbtManager state = NbtManager.getServerState(server);
         PlayerEntity player = source.getPlayer();
         PlayerData playerData = NbtManager.getPlayerState(player);
-        GroupData groupData = state.groupList.get(playerData.groupName);
+        GroupData groupData = state.groupList.get(playerData.getGroupName());
 
-        if (!source.isExecutedByPlayer() || playerData.groupName.isEmpty() || !player.getUuid().equals(groupData.getLeader()))
+        if (!source.isExecutedByPlayer() || !playerData.isInAGroup() || !player.getUuid().equals(groupData.getLeader()))
             return builder.buildFuture();
 
         if (groupData.getRequestsSize() != 1)
             builder.suggest(ALL_REQUESTS_PARAMETER);
 
-        groupData.getRequests().forEach(uuid -> builder.suggest(state.players.get(uuid).username));
+        groupData.getRequests().forEach(uuid -> builder.suggest(state.players.get(uuid).getUsername()));
 
         return builder.buildFuture();
     }

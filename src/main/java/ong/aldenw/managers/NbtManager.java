@@ -60,8 +60,8 @@ public class NbtManager extends PersistentState {
         NbtCompound playersNbt = new NbtCompound();
         players.forEach(((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
-            playerNbt.putString("groupId", playerData.groupName);
-            playerNbt.putString("username", playerData.username);
+            playerNbt.putString("groupId", playerData.getGroupName());
+            playerNbt.putString("username", playerData.getUsername());
             playersNbt.put(uuid.toString(), playerNbt);
         }));
 
@@ -99,13 +99,11 @@ public class NbtManager extends PersistentState {
 
         NbtCompound playersNbt = tag.getCompound("players");
         playersNbt.getKeys().forEach(key -> {
-            PlayerData playerData = new PlayerData();
-
-            playerData.groupName = playersNbt.getCompound(key).getString("groupId");
-            playerData.username = playersNbt.getCompound(key).getString("username");
-
-            UUID uuid = UUID.fromString(key);
-            state.players.put(uuid, playerData);
+            PlayerData playerData = new PlayerData(
+                playersNbt.getCompound(key).getString("groupId"),
+                playersNbt.getCompound(key).getString("username")
+            );
+            state.players.put(UUID.fromString(key), playerData);
         });
 
         NbtCompound playerUuidsNbt = tag.getCompound("playerUuids");
@@ -133,21 +131,24 @@ public class NbtManager extends PersistentState {
         if (!serverState.playerUuids.containsKey(playerName) || !serverState.playerUuids.get(playerName).equals(player.getUuid())) {
             serverState.playerUuids.put(playerName, player.getUuid());
         }
-        PlayerData playerData = serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData());
-        if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {
-            playerData.groupName = "";
+        PlayerData playerData = serverState.players.computeIfAbsent(player.getUuid(), uuid -> new PlayerData(playerName));
+        if (Objects.isNull(serverState.groupList.get(playerData.getGroupName()))) {
+            playerData.leaveGroup();
         }
-        if (!playerData.username.equals(playerName)) {
-            playerData.username = playerName;
+        if (!playerData.getUsername().equals(playerName)) {
+            playerData.updateUsername(playerName);
         }
         return playerData;
     }
 
     public static PlayerData getPlayerState(UUID playerUuid, MinecraftServer server) {
         NbtManager serverState = getServerState(server);
-        PlayerData playerData = serverState.players.computeIfAbsent(playerUuid, uuid -> new PlayerData());
-        if (Objects.isNull(serverState.groupList.get(playerData.groupName))) {
-            playerData.groupName = "";
+        PlayerData playerData = serverState.players.computeIfAbsent(playerUuid, uuid -> {
+            SimpleGroups.LOGGER.warn("Creating new PlayerData without a username. (MANAGERS.NBT.GETPLAYERSTATE");
+            return new PlayerData("<UNKNOWN USERNAME>");
+        });
+        if (Objects.isNull(serverState.groupList.get(playerData.getGroupName()))) {
+            playerData.leaveGroup();
         }
         return playerData;
     }

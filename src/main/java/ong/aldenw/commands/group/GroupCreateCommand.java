@@ -24,7 +24,7 @@ public class GroupCreateCommand {
         PlayerData playerState = NbtManager.getPlayerState(player);
         String groupName = StringArgumentType.getString(context, "groupName");
 
-        if (!state.players.get(player.getUuid()).groupName.isEmpty()) {
+        if (playerState.isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal("You are already in a group.").withColor(RgbIntFormat.fromThree(255, 0, 0)), false);
             return 1;
         }
@@ -41,7 +41,7 @@ public class GroupCreateCommand {
             return 1;
         }
 
-        playerState.groupName = groupName;
+        playerState.joinGroup(groupName);
         GroupData newGroupData = new GroupData(groupName, player.getUuid());
         state.groupList.put(groupName, newGroupData);
 

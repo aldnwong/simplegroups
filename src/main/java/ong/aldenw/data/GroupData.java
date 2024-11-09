@@ -81,7 +81,7 @@ public class GroupData {
         state.groupList.remove(this.name);
         state.groupList.put(name, this);
         this.name = name;
-        players.forEach(groupPlayer -> state.players.get(groupPlayer).groupName = name);
+        players.forEach(groupPlayer -> state.players.get(groupPlayer).joinGroup(name));
 
         notifyOnlineMembers(Text.empty().append(Text.literal("Your group's name has changed to ").formatted(Formatting.GOLD)).append(Text.literal(name).withColor(color)), server);
     }
@@ -137,9 +137,8 @@ public class GroupData {
 
     public void changeLeader(UUID uuid, MinecraftServer server) {
         if (leader.equals(uuid) || !players.contains(uuid)) return;
-
         this.leader = uuid;
-        notifyOnlineMembers(Text.empty().append(Text.literal("Your group's leader has changed to ").formatted(Formatting.GOLD)).append(Text.literal(NbtManager.getPlayerState(uuid, server).username).withColor(color)), server);
+        notifyOnlineMembers(Text.empty().append(Text.literal("Your group's leader has changed to ").formatted(Formatting.GOLD)).append(Text.literal(NbtManager.getPlayerState(uuid, server).getUsername()).withColor(color)), server);
     }
 
     public List<UUID> getPlayers() {
@@ -150,11 +149,11 @@ public class GroupData {
         requests.remove(playerUuid);
         NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
-        if (Objects.isNull(playerData) || !playerData.groupName.isEmpty() || players.contains(playerUuid)) return;
+        if (Objects.isNull(playerData) || playerData.isInAGroup() || players.contains(playerUuid)) return;
 
         players.add(playerUuid);
-        playerData.groupName = name;
-        notifyOnlineMembers(Text.empty().append(Text.literal(playerData.username).withColor(color)).append(Text.literal(" has joined the group").formatted(Formatting.GOLD)), server);
+        playerData.joinGroup(name);
+        notifyOnlineMembers(Text.empty().append(Text.literal(playerData.getUsername()).withColor(color)).append(Text.literal(" has joined the group").formatted(Formatting.GOLD)), server);
 
         ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(playerEntity)) {
@@ -167,11 +166,11 @@ public class GroupData {
     public void removePlayer(UUID playerUuid, MinecraftServer server) {
         NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
-        if (leader.equals(playerUuid) || Objects.isNull(playerData) || !playerData.groupName.equals(name)) return;
+        if (leader.equals(playerUuid) || Objects.isNull(playerData) || !playerData.isInGroup(name)) return;
 
         players.remove(playerUuid);
-        playerData.groupName = "";
-        notifyOnlineMembers(Text.empty().append(Text.literal(playerData.username)).append(Text.literal(" has left the group").formatted(Formatting.GOLD)), server);
+        playerData.leaveGroup();
+        notifyOnlineMembers(Text.empty().append(Text.literal(playerData.getUsername())).append(Text.literal(" has left the group").formatted(Formatting.GOLD)), server);
 
         ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(playerEntity)) {
@@ -220,10 +219,10 @@ public class GroupData {
     public void addRequest(UUID playerUuid, MinecraftServer server) {
         NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
-        if (requests.contains(playerUuid) || players.contains(playerUuid) || visibility != 1 || !playerData.groupName.isEmpty()) return;
+        if (requests.contains(playerUuid) || players.contains(playerUuid) || visibility != 1 || playerData.isInAGroup()) return;
 
         requests.add(playerUuid);
-        notifyGroupLeader(Text.empty().append(Text.literal(playerData.username)).append(Text.literal(" has requested to join your group").formatted(Formatting.YELLOW)), server);
+        notifyGroupLeader(Text.empty().append(Text.literal(playerData.getUsername())).append(Text.literal(" has requested to join your group").formatted(Formatting.YELLOW)), server);
     }
 
     public void denyRequest(UUID playerUuid, MinecraftServer server) {
@@ -231,7 +230,7 @@ public class GroupData {
         NbtManager state = NbtManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
 
-        if (!playerData.groupName.isEmpty()) return;
+        if (playerData.isInAGroup()) return;
 
         ServerPlayerEntity requestingPlayerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(requestingPlayerEntity)) {

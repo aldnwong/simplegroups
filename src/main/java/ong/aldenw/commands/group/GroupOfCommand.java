@@ -26,11 +26,11 @@ public class GroupOfCommand {
         }
 
         PlayerData playerState = (Objects.nonNull(player)) ? NbtManager.getPlayerState(player) : NbtManager.getPlayerState(serverState.playerUuids.get(playerArg), server);
-        if (playerState.groupName.isEmpty()) {
+        if (!playerState.isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal(playerArg + " is not in a group").formatted(Formatting.YELLOW), false);
         }
         else {
-            GroupData groupData = serverState.groupList.get(playerState.groupName);
+            GroupData groupData = serverState.groupList.get(playerState.getGroupName());
             context.getSource().sendFeedback(() -> Text.empty().append(Text.literal(playerArg).withColor(groupData.getColor())).append(Text.literal(" is in group ").formatted(Formatting.GOLD)).append(Text.literal(groupData.getName()).withColor(groupData.getColor())), false);
         }
         return 1;

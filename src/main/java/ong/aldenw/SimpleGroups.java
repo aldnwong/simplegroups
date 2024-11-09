@@ -39,7 +39,7 @@ public class SimpleGroups implements ModInitializer {
 			NbtManager state = NbtManager.getServerState(server);
 			ServerPlayerEntity player = handler.getPlayer();
 			PlayerData playerData = NbtManager.getPlayerState(player);
-			GroupData groupData = state.groupList.get(playerData.groupName);
+			GroupData groupData = state.groupList.get(playerData.getGroupName());
 
 			if (!Objects.isNull(groupData)) {
 				if (!groupData.getPrefix().isEmpty())
