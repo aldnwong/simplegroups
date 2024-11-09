@@ -1,10 +1,12 @@
 package ong.aldenw.data;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import ong.aldenw.SimpleGroups;
 import ong.aldenw.formats.GroupFormat;
 import ong.aldenw.managers.NbtManager;
 import ong.aldenw.managers.NetworkManager;
@@ -32,10 +34,11 @@ public class GroupData {
     }
 
     // Load from NBT constructor
-    public GroupData(String provName, String provPrefix, int provColor, int visibility, NbtCompound playersNbt, NbtCompound requestsNbt) {
-        this.name = provName;
-        this.prefix = provPrefix;
-        this.color = provColor;
+    public GroupData(String name, String prefix, int color, int visibility, NbtCompound playersNbt, NbtList requestsNbt) {
+        SimpleGroups.LOGGER.info("LOADING GROUP {} FROM NBT DATA", name);
+        this.name = name;
+        this.prefix = prefix;
+        this.color = color;
         this.visibility = visibility;
 
         playersNbt.getKeys().forEach(playerKey -> {
@@ -46,7 +49,9 @@ public class GroupData {
             this.players.add(UUID.fromString(playerKey));
         });
 
-        requestsNbt.getKeys().forEach(playerKey -> this.requests.add(UUID.fromString(playerKey)));
+        SimpleGroups.LOGGER.info(requestsNbt.toString());
+
+        requestsNbt.forEach(playerUuid -> requests.add(UUID.fromString(playerUuid.asString())));
     }
 
     public void notifyOnlineMembers(Text text, MinecraftServer server) {

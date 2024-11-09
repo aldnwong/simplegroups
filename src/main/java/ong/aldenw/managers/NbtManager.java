@@ -48,8 +48,8 @@ public class NbtManager extends PersistentState {
             }));
             groupNbt.put("players", groupPlayersNbt);
 
-            NbtCompound groupRequestsNbt = new NbtCompound();
-            groupData.getRequests().forEach((uuid -> groupRequestsNbt.putString(uuid.toString(), ":3")));
+            NbtList groupRequestsNbt = new NbtList();
+            groupData.getRequests().forEach((uuid -> groupRequestsNbt.add(NbtString.of(uuid.toString()))));
             groupNbt.put("requests", groupRequestsNbt);
 
             groupsNbt.put(id, groupNbt);
@@ -92,7 +92,7 @@ public class NbtManager extends PersistentState {
                     groupsNbt.getCompound(key).getInt("color"),
                     groupsNbt.getCompound(key).getInt("visibility"),
                     groupsNbt.getCompound(key).getCompound("players"),
-                    groupsNbt.getCompound(key).getCompound("requests")
+                    groupsNbt.getCompound(key).getList("requests", NbtElement.STRING_TYPE)
             );
             state.groupList.put(key, groupData);
         });
