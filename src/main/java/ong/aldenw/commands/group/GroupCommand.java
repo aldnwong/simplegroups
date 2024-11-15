@@ -5,10 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import ong.aldenw.commands.suggestions.GroupSuggestions;
-import ong.aldenw.commands.suggestions.PlayerSuggestions;
-import ong.aldenw.commands.suggestions.JoinOptionSuggestions;
-import ong.aldenw.commands.suggestions.RequestSuggestions;
+import ong.aldenw.commands.suggestions.*;
 
 public class GroupCommand {
     public final static String commandName = "group";
@@ -59,6 +56,10 @@ public class GroupCommand {
                         .executes(GroupLeaveCommand::execute))
                 .then(CommandManager.literal("delete")
                         .executes(GroupDeleteCommand::execute))
+                .then(CommandManager.literal("transfer")
+                        .then(CommandManager.argument("player", StringArgumentType.string())
+                                .suggests(new GroupMemberSuggestions())
+                                .executes(GroupTransferCommand::execute)))
                 .then(CommandManager.literal("requests")
                         .then(CommandManager.literal("view")
                                 .executes(GroupRequestsCommand::viewExecute))
