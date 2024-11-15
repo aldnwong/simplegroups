@@ -7,7 +7,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.managers.NbtManager;
+import ong.aldenw.managers.DataManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 
@@ -17,7 +17,7 @@ public class GroupOfCommand {
     public static int execute(CommandContext<ServerCommandSource> context) {
         String playerArg = StringArgumentType.getString(context, "player");
         MinecraftServer server = context.getSource().getWorld().getServer();
-        NbtManager serverState = NbtManager.getServerState(server);
+        DataManager serverState = DataManager.getServerState(server);
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerArg);
 
         if(!Objects.nonNull(player) && !serverState.playerUuids.containsKey(playerArg)) {
@@ -25,7 +25,7 @@ public class GroupOfCommand {
             return 1;
         }
 
-        PlayerData playerState = (Objects.nonNull(player)) ? NbtManager.getPlayerState(player) : NbtManager.getPlayerState(serverState.playerUuids.get(playerArg), server);
+        PlayerData playerState = (Objects.nonNull(player)) ? DataManager.getPlayerState(player) : DataManager.getPlayerState(serverState.playerUuids.get(playerArg), server);
         if (!playerState.isInAGroup()) {
             context.getSource().sendFeedback(() -> Text.literal(playerArg + " is not in a group").formatted(Formatting.YELLOW), false);
         }

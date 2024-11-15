@@ -57,6 +57,8 @@ public class GroupCommand {
                                 .executes(GroupJoinCommand::execute)))
                 .then(CommandManager.literal("leave")
                         .executes(GroupLeaveCommand::execute))
+                .then(CommandManager.literal("delete")
+                        .executes(GroupDeleteCommand::execute))
                 .then(CommandManager.literal("requests")
                         .then(CommandManager.literal("view")
                                 .executes(GroupRequestsCommand::viewExecute))

@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.managers.CommandManager;
-import ong.aldenw.managers.NbtManager;
+import ong.aldenw.managers.DataManager;
 import ong.aldenw.managers.NetworkManager;
 import ong.aldenw.network.ClearCachePayload;
 import ong.aldenw.network.UpdateColorPayload;
@@ -36,9 +36,9 @@ public class SimpleGroups implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(ClearCachePayload.ID, ClearCachePayload.CODEC);
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			NbtManager state = NbtManager.getServerState(server);
+			DataManager state = DataManager.getServerState(server);
 			ServerPlayerEntity player = handler.getPlayer();
-			PlayerData playerData = NbtManager.getPlayerState(player);
+			PlayerData playerData = DataManager.getPlayerState(player);
 			GroupData groupData = state.groupList.get(playerData.getGroupName());
 
 			if (!Objects.isNull(groupData)) {

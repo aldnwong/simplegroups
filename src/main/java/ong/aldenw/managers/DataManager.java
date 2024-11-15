@@ -16,15 +16,14 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
-public class NbtManager extends PersistentState {
-    // TODO: Make variables private and only access/modify through accessor and modifier methods
+public class DataManager extends PersistentState {
     public HashMap<String, GroupData> groupList = new HashMap<>();
     public HashMap<UUID, PlayerData> players = new HashMap<>();
     public HashMap<String, UUID> playerUuids = new HashMap<>();
 
-    private static final Type<NbtManager> type = new Type<>(
-            NbtManager::new,
-            NbtManager::createFromNbt,
+    private static final Type<DataManager> type = new Type<>(
+            DataManager::new,
+            DataManager::createFromNbt,
             null
     );
 
@@ -81,8 +80,8 @@ public class NbtManager extends PersistentState {
         return nbt;
     }
 
-    public static NbtManager createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
-        NbtManager state = new NbtManager();
+    public static DataManager createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
+        DataManager state = new DataManager();
 
         NbtCompound groupsNbt = tag.getCompound("groups");
         groupsNbt.getKeys().forEach(key -> {
@@ -118,15 +117,15 @@ public class NbtManager extends PersistentState {
         return state;
     }
 
-    public static NbtManager getServerState(MinecraftServer server) {
+    public static DataManager getServerState(MinecraftServer server) {
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
-        NbtManager state = persistentStateManager.getOrCreate(type, SimpleGroups.MOD_ID);
+        DataManager state = persistentStateManager.getOrCreate(type, SimpleGroups.MOD_ID);
         state.markDirty();
         return state;
     }
 
     public static PlayerData getPlayerState(LivingEntity player) {
-        NbtManager serverState = getServerState(player.getWorld().getServer());
+        DataManager serverState = getServerState(player.getWorld().getServer());
         String playerName = player.getName().getString();
         if (!serverState.playerUuids.containsKey(playerName) || !serverState.playerUuids.get(playerName).equals(player.getUuid())) {
             serverState.playerUuids.put(playerName, player.getUuid());
@@ -142,7 +141,7 @@ public class NbtManager extends PersistentState {
     }
 
     public static PlayerData getPlayerState(UUID playerUuid, MinecraftServer server) {
-        NbtManager serverState = getServerState(server);
+        DataManager serverState = getServerState(server);
         PlayerData playerData = serverState.players.computeIfAbsent(playerUuid, uuid -> {
             SimpleGroups.LOGGER.warn("Creating new PlayerData without a username. (MANAGERS.NBT.GETPLAYERSTATE");
             return new PlayerData("<UNKNOWN USERNAME>");

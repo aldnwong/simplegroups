@@ -6,7 +6,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.server.command.ServerCommandSource;
-import ong.aldenw.managers.NbtManager;
+import ong.aldenw.managers.DataManager;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +23,7 @@ public class PlayerSuggestions implements SuggestionProvider<ServerCommandSource
             builder.suggest(playerName);
         }
 
-        NbtManager.getServerState(source.getServer()).playerUuids.forEach((username, uuid) -> {
+        DataManager.getServerState(source.getServer()).playerUuids.forEach((username, uuid) -> {
             if (!playerNames.contains(username)) {
                 builder.suggest(username);
             }

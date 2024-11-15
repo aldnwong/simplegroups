@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.managers.NbtManager;
+import ong.aldenw.managers.DataManager;
 import ong.aldenw.SimpleGroups;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
@@ -20,9 +20,9 @@ public class GroupJoinCommand {
         }
 
         MinecraftServer server = context.getSource().getServer();
-        NbtManager state = NbtManager.getServerState(server);
+        DataManager state = DataManager.getServerState(server);
         PlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerState = NbtManager.getPlayerState(player);
+        PlayerData playerState = DataManager.getPlayerState(player);
         String groupName = StringArgumentType.getString(context, "groupName");
         GroupData groupState = state.groupList.get(groupName);
 

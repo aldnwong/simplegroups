@@ -7,7 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import ong.aldenw.formats.GroupFormat;
-import ong.aldenw.managers.NbtManager;
+import ong.aldenw.managers.DataManager;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
@@ -19,9 +19,9 @@ public class GroupCreateCommand {
             return 1;
         }
 
-        NbtManager state = NbtManager.getServerState(context.getSource().getServer());
+        DataManager state = DataManager.getServerState(context.getSource().getServer());
         ServerPlayerEntity player = context.getSource().getPlayer();
-        PlayerData playerState = NbtManager.getPlayerState(player);
+        PlayerData playerState = DataManager.getPlayerState(player);
         String groupName = StringArgumentType.getString(context, "groupName");
 
         if (playerState.isInAGroup()) {
