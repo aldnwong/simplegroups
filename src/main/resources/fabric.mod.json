@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
 	"id": "simple-groups",
-	"version": "${version}",
+	"version": "1.0.0",
 	"name": "Simple Groups",
-	"description": "Kind of like the /team command in Minecraft, but with more flexibility.",
+	"description": "Allows players to create their own groups with different chat colors and prefixes.",
 	"authors": [
 		"aldnwong"
 	],
