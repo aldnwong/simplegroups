@@ -6,7 +6,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.SimpleGroups;
 import ong.aldenw.formats.GroupFormat;
 import ong.aldenw.managers.DataManager;
 import ong.aldenw.managers.NetworkManager;
@@ -20,8 +19,9 @@ public class GroupData {
     private int color;
     private int visibility;
     private UUID leader;
-    private ArrayList<UUID> players = new ArrayList<>();
-    private ArrayList<UUID> requests = new ArrayList<>();
+    private final ArrayList<UUID> players = new ArrayList<>();
+    private final ArrayList<UUID> requests = new ArrayList<>();
+    private final ArrayList<UUID> invites = new ArrayList<>();
 
     // New group constructor
     public GroupData(String name, UUID creator) {
@@ -148,6 +148,7 @@ public class GroupData {
 
     public void addPlayer(UUID playerUuid, MinecraftServer server) {
         requests.remove(playerUuid);
+        invites.remove(playerUuid);
         DataManager state = DataManager.getServerState(server);
         PlayerData playerData = state.players.get(playerUuid);
         if (Objects.isNull(playerData) || playerData.isInAGroup() || players.contains(playerUuid)) return;
@@ -266,5 +267,14 @@ public class GroupData {
         });
         players.clear();
         DataManager.getServerState(server).groupList.remove(this.name);
+    }
+
+    public boolean invited(UUID playerUuid) {
+        return invites.contains(playerUuid);
+    }
+
+    public void addInvite(UUID playerUuid) {
+        if (!invites.contains(playerUuid))
+            invites.add(playerUuid);
     }
 }

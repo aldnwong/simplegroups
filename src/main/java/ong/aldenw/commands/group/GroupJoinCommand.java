@@ -34,6 +34,10 @@ public class GroupJoinCommand {
             context.getSource().sendFeedback(() -> Text.literal("Group not found").formatted(Formatting.DARK_RED), false);
             return 1;
         }
+        if (groupState.invited(player.getUuid())) {
+            groupState.addPlayer(player.getUuid(), server);
+            return 1;
+        }
 
         switch (groupState.getVisibility()) {
             case 0:
