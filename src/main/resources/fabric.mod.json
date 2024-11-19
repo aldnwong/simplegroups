@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "simple-groups",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"name": "Simple Groups",
 	"description": "Allows players to create their own groups with different chat colors and prefixes.",
 	"authors": [

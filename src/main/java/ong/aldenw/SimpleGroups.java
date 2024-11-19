@@ -57,6 +57,6 @@ public class SimpleGroups implements ModInitializer {
 		});
 
 		CommandRegistrationCallback.EVENT.register(CommandManager::initialize);
-		LOGGER.info("Simple Groups plugin initialized. :3");
+		LOGGER.info("Simple Groups plugin initialized.");
 	}
 }
