@@ -14,6 +14,8 @@ import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
 
+import static ong.aldenw.formats.GroupFormat.ALLOWED_CHARACTERS;
+
 public class GroupConfigCommand {
     public static boolean checkExecuteRequirements(CommandContext<ServerCommandSource> context) {
         if (!context.getSource().isExecutedByPlayer()) {
@@ -61,6 +63,17 @@ public class GroupConfigCommand {
         }
         if (newName.length() > GroupFormat.MAX_GROUP_NAME_LENGTH) {
             context.getSource().sendFeedback(() -> Text.literal("Name must be shorter than " + GroupFormat.MAX_GROUP_NAME_LENGTH + " characters").formatted(Formatting.DARK_RED), false);
+            return 1;
+        }
+        boolean allowedChars = true;
+        for (char nameChar : newName.toCharArray()) {
+            if (ALLOWED_CHARACTERS.indexOf(nameChar) == -1) {
+                allowedChars = false;
+                break;
+            }
+        }
+        if (!allowedChars) {
+            context.getSource().sendFeedback(() -> Text.literal("Name contains illegal characters (Aa-Zz only)").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 

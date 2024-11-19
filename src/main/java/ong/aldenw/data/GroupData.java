@@ -73,12 +73,13 @@ public class GroupData {
 
     public void changeName(String name, MinecraftServer server) {
         DataManager state = DataManager.getServerState(server);
-        if (this.name.equals(name) || GroupFormat.isNameValid(name, state)) return;
+        if (this.name.equals(name) || !GroupFormat.isNameValid(name, state)) return;
 
         state.groupList.remove(this.name);
-        state.groupList.put(name, this);
         this.name = name;
-        players.forEach(groupPlayer -> state.players.get(groupPlayer).joinGroup(name));
+        state.groupList.put(name, this);
+
+        players.forEach(groupPlayer -> DataManager.getPlayerState(groupPlayer, server).joinGroup(name));
 
         notifyOnlineMembers(Text.empty().append(Text.literal("Your group's name has changed to ").formatted(Formatting.GOLD)).append(Text.literal(name).withColor(color)), server);
     }
