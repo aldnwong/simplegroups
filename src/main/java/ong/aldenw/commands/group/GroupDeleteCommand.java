@@ -4,19 +4,22 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import ong.aldenw.SimpleGroups;
 import ong.aldenw.data.GroupData;
 import ong.aldenw.data.PlayerData;
 import ong.aldenw.formats.RgbIntFormat;
 import ong.aldenw.managers.DataManager;
+import ong.aldenw.managers.NetworkManager;
 
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.UUID;
 
 
 public class GroupDeleteCommand {
-    public static HashMap<GroupData, Long> deleteRequests = new HashMap<>();
+    public static HashMap<String, Long> deleteRequests = new HashMap<>();
     public static final int DELETE_WINDOW_SECONDS = 15;
 
     public static int execute(CommandContext<ServerCommandSource> context) {
@@ -40,20 +43,20 @@ public class GroupDeleteCommand {
             return 1;
         }
 
-        if (!deleteRequests.containsKey(groupData)) {
+        if (!deleteRequests.containsKey(groupData.getName())) {
             context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Are you sure you want to delete your group? This action is ").formatted(Formatting.GOLD)).append(Text.literal("irreversible").formatted(Formatting.DARK_RED, Formatting.UNDERLINE)), false);
             context.getSource().sendFeedback(() -> Text.literal("Run this command again within " + DELETE_WINDOW_SECONDS + " seconds to confirm.").formatted(Formatting.GOLD), false);
-            deleteRequests.put(groupData, System.currentTimeMillis() + (DELETE_WINDOW_SECONDS * 1000));
+            deleteRequests.put(groupData.getName(), System.currentTimeMillis() + (DELETE_WINDOW_SECONDS * 1000));
         }
         else {
-            long windowEnd = deleteRequests.get(groupData);
+            long windowEnd = deleteRequests.get(groupData.getName());
             if (System.currentTimeMillis() > windowEnd) {
                 context.getSource().sendFeedback(() -> Text.empty().append(Text.literal("Are you sure you want to delete your group? This action is ").formatted(Formatting.GOLD)).append(Text.literal("irreversible").formatted(Formatting.DARK_RED, Formatting.UNDERLINE)), false);
                 context.getSource().sendFeedback(() -> Text.literal("Run this command again within " + DELETE_WINDOW_SECONDS + " seconds to confirm.").formatted(Formatting.GOLD), false);
-                deleteRequests.put(groupData, System.currentTimeMillis() + (DELETE_WINDOW_SECONDS * 1000));
+                deleteRequests.put(groupData.getName(), System.currentTimeMillis() + (DELETE_WINDOW_SECONDS * 1000));
             }
             else {
-                deleteRequests.remove(groupData);
+                deleteRequests.remove(groupData.getName());
                 groupData.deleteGroup(server);
             }
         }

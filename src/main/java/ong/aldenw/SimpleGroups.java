@@ -43,13 +43,13 @@ public class SimpleGroups implements ModInitializer {
 
 			if (!Objects.isNull(groupData)) {
 				if (!groupData.getPrefix().isEmpty())
-					NetworkManager.updatePrefixCache(player, groupData.getPrefix(), server);
+					NetworkManager.updatePrefixCache(player.getUuid(), groupData.getPrefix(), server);
 
-				NetworkManager.updateColorCache(player, groupData.getColor(), server);
+				NetworkManager.updateColorCache(player.getUuid(), groupData.getColor(), server);
 
 				if (groupData.getLeader().equals(player.getUuid()) && groupData.hasRequests()) {
 					int requestsSize = groupData.getRequestsSize();
-					player.sendMessage(Text.empty().append(Text.literal("Your group has ").formatted(Formatting.GOLD)).append(Text.literal(requestsSize + "").formatted(Formatting.AQUA)).append(Text.literal((requestsSize == 1) ? " join request!" : "join requests!").formatted(Formatting.GOLD)));
+					player.sendMessageToClient(Text.empty().append(Text.literal("Your group has ").formatted(Formatting.GOLD)).append(Text.literal(requestsSize + "").formatted(Formatting.AQUA)).append(Text.literal((requestsSize == 1) ? " join request!" : "join requests!").formatted(Formatting.GOLD)), false);
 				}
 			}
 

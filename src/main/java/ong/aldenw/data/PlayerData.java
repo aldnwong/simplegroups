@@ -3,9 +3,8 @@ package ong.aldenw.data;
 import java.util.ArrayList;
 
 public class PlayerData {
-    private String groupName = "";
-    private String username = "";
-    private ArrayList<String> requests = new ArrayList<>();
+    private String groupName;
+    private String username;
 
     public PlayerData(String username) {
         this.groupName = "";
@@ -40,7 +39,6 @@ public class PlayerData {
     public void joinGroup(String groupName) {
         if (isInAGroup()) return;
         this.groupName = groupName;
-        // TODO: Clear requests
     }
 
     public void leaveGroup() {

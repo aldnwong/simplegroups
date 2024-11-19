@@ -15,24 +15,21 @@ public class NetworkManager {
     public static HashMap<UUID, String> playerPrefixDataHashMap = new HashMap<>();
     public static HashMap<UUID, Integer> playerColorDataHashMap = new HashMap<>();
 
-    public static void updatePrefixCache(PlayerEntity player, String prefix, MinecraftServer server) {
-        UUID playerUuid = player.getUuid();
+    public static void updatePrefixCache(UUID playerUuid, String prefix, MinecraftServer server) {
         playerPrefixDataHashMap.put(playerUuid, prefix);
         server.getPlayerManager().getPlayerList().forEach(serverPlayer -> {
             ServerPlayNetworking.send(serverPlayer, new UpdatePrefixPayload(playerUuid.toString(), prefix));
         });
     }
 
-    public static void updateColorCache(PlayerEntity player, int color, MinecraftServer server) {
-        UUID playerUuid = player.getUuid();
+    public static void updateColorCache(UUID playerUuid, int color, MinecraftServer server) {
         playerColorDataHashMap.put(playerUuid, color);
         server.getPlayerManager().getPlayerList().forEach(serverPlayer -> {
             ServerPlayNetworking.send(serverPlayer, new UpdateColorPayload(playerUuid.toString(), color));
         });
     }
 
-    public static void clearCache(PlayerEntity player, MinecraftServer server) {
-        UUID playerUuid = player.getUuid();
+    public static void clearCache(UUID playerUuid, MinecraftServer server) {
         playerColorDataHashMap.remove(playerUuid);
         playerPrefixDataHashMap.remove(playerUuid);
         server.getPlayerManager().getPlayerList().forEach(serverPlayer -> {

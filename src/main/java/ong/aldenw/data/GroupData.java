@@ -55,7 +55,7 @@ public class GroupData {
         players.forEach(groupPlayer -> {
             ServerPlayerEntity groupPlayerEntity = server.getPlayerManager().getPlayer(groupPlayer);
             if (!Objects.isNull(groupPlayerEntity)) {
-                groupPlayerEntity.sendMessage(text);
+                groupPlayerEntity.sendMessageToClient(text, false);
             }
         });
     }
@@ -63,7 +63,7 @@ public class GroupData {
     public void notifyGroupLeader(Text text, MinecraftServer server) {
         ServerPlayerEntity groupPlayerEntity = server.getPlayerManager().getPlayer(leader);
         if (!Objects.isNull(groupPlayerEntity)) {
-            groupPlayerEntity.sendMessage(text);
+            groupPlayerEntity.sendMessageToClient(text, false);
         }
     }
 
@@ -160,8 +160,8 @@ public class GroupData {
         ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(playerEntity)) {
             if (!prefix.isEmpty())
-                NetworkManager.updatePrefixCache(playerEntity, prefix, server);
-            NetworkManager.updateColorCache(playerEntity, color, server);
+                NetworkManager.updatePrefixCache(playerEntity.getUuid(), prefix, server);
+            NetworkManager.updateColorCache(playerEntity.getUuid(), color, server);
         }
     }
 
@@ -176,7 +176,7 @@ public class GroupData {
 
         ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(playerEntity)) {
-            NetworkManager.clearCache(playerEntity, server);
+            NetworkManager.clearCache(playerEntity.getUuid(), server);
         }
     }
 
@@ -188,7 +188,7 @@ public class GroupData {
         players.forEach(groupPlayer -> {
             ServerPlayerEntity onlineGroupPlayer = server.getPlayerManager().getPlayer(groupPlayer);
             if (!Objects.isNull(onlineGroupPlayer)) {
-                NetworkManager.updateColorCache(onlineGroupPlayer, color, server);
+                NetworkManager.updateColorCache(onlineGroupPlayer.getUuid(), color, server);
             }
         });
     }
@@ -197,7 +197,7 @@ public class GroupData {
         players.forEach(groupPlayer -> {
             ServerPlayerEntity onlineGroupPlayer = server.getPlayerManager().getPlayer(groupPlayer);
             if (!Objects.isNull(onlineGroupPlayer)) {
-                NetworkManager.updatePrefixCache(onlineGroupPlayer, prefix, server);
+                NetworkManager.updatePrefixCache(onlineGroupPlayer.getUuid(), prefix, server);
             }
         });
     }
@@ -236,7 +236,7 @@ public class GroupData {
 
         ServerPlayerEntity requestingPlayerEntity = server.getPlayerManager().getPlayer(playerUuid);
         if (!Objects.isNull(requestingPlayerEntity)) {
-            requestingPlayerEntity.sendMessage(Text.empty().append(Text.literal("You have been denied from ").formatted(Formatting.DARK_RED)).append(Text.literal(name).withColor(color)));
+            requestingPlayerEntity.sendMessageToClient(Text.empty().append(Text.literal("You have been denied from ").formatted(Formatting.DARK_RED)).append(Text.literal(name).withColor(color)), false);
         }
     }
 
@@ -252,23 +252,6 @@ public class GroupData {
         }
     }
 
-    public void deleteGroup(MinecraftServer server) {
-        leader = null;
-        players.forEach(uuid -> {
-            DataManager state = DataManager.getServerState(server);
-            PlayerData playerData = state.players.get(uuid);
-            playerData.leaveGroup();
-
-            ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(uuid);
-            if (!Objects.isNull(playerEntity)) {
-                NetworkManager.clearCache(playerEntity, server);
-                playerEntity.sendMessage(Text.literal("Your group has been deleted").formatted(Formatting.GOLD));
-            }
-        });
-        players.clear();
-        DataManager.getServerState(server).groupList.remove(this.name);
-    }
-
     public boolean invited(UUID playerUuid) {
         return invites.contains(playerUuid);
     }
@@ -276,5 +259,18 @@ public class GroupData {
     public void addInvite(UUID playerUuid) {
         if (!invites.contains(playerUuid))
             invites.add(playerUuid);
+    }
+
+    public void deleteGroup(MinecraftServer server) {
+        for (UUID playerUuid : players) {
+            PlayerData playerData = DataManager.getPlayerState(playerUuid, server);
+            playerData.leaveGroup();
+            NetworkManager.clearCache(playerUuid, server);
+            ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(playerUuid);
+            if (!Objects.isNull(playerEntity)) {
+                playerEntity.sendMessageToClient(Text.literal("Your group has been deleted").formatted(Formatting.GOLD), false);
+            }
+        }
+        DataManager.getServerState(server).groupList.remove(this.getName());
     }
 }

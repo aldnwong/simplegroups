@@ -48,8 +48,8 @@ public class GroupInviteCommand {
         }
 
         groupData.addInvite(invitedPlayer.getUuid());
-        invitedPlayer.sendMessage(Text.empty().append(Text.literal("You have been invited to join ").formatted(Formatting.GOLD)).append(Text.literal(groupData.getName()).withColor(groupData.getColor())));
-        invitedPlayer.sendMessage(Text.empty().append(Text.literal("Use ").formatted(Formatting.GOLD)).append("/group join \"" + groupData.getName() + "\"").append(Text.literal(" to join the group!").formatted(Formatting.GOLD)));
+        invitedPlayer.sendMessageToClient(Text.empty().append(Text.literal("You have been invited to join ").formatted(Formatting.GOLD)).append(Text.literal(groupData.getName()).withColor(groupData.getColor())), false);
+        invitedPlayer.sendMessageToClient(Text.empty().append(Text.literal("Use ").formatted(Formatting.GOLD)).append("/group join \"" + groupData.getName() + "\"").append(Text.literal(" to join the group!").formatted(Formatting.GOLD)), false);
         context.getSource().sendFeedback(() -> Text.literal("Player has been invited").formatted(Formatting.GOLD), false);
         return 1;
     }
