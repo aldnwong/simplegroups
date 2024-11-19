@@ -1,5 +1,5 @@
 # Simple Groups
-1.21.1 Fabric mod to allow players to create their own groups. 
+Simple Groups is a 1.21.3 Fabric mod to allow players to create their own groups. 
 This is my first attempt at making a Fabric mod, so a lot of the code isn't amazing. I'd like to make a v2 version of this mod, but for now I'd like to focus on other projects.
 
 Requires Fabric API. Needs to be installed both server-side and client-side.
