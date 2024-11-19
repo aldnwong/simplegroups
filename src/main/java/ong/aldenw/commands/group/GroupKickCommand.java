@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import ong.aldenw.SimpleGroups;
@@ -46,13 +47,18 @@ public class GroupKickCommand {
         if (!groupData.getPlayers().contains(kickedPlayerUuid)) {
             if (kickedPlayerState.getGroupName().equals(groupData.getName())) {
                 kickedPlayerState.leaveGroup();
+                context.getSource().sendFeedback(() -> Text.literal("Player has been removed").formatted(Formatting.YELLOW), false);
+                SimpleGroups.LOGGER.error("Player group data did not match server group data (GROUP.KICK)");
+                return 1;
             }
-            context.getSource().sendFeedback(() -> Text.literal("Player has been removed").formatted(Formatting.YELLOW), false);
-            SimpleGroups.LOGGER.error("Player group data did not match server group data (GROUP.KICK)");
+            context.getSource().sendFeedback(() -> Text.literal("Player is not in the group").formatted(Formatting.DARK_RED), false);
             return 1;
         }
 
         groupData.removePlayer(kickedPlayerUuid, server);
+        ServerPlayerEntity kickedPlayer = server.getPlayerManager().getPlayer(kickedPlayerUuid);
+        if (!Objects.isNull(kickedPlayer))
+            kickedPlayer.sendMessageToClient(Text.empty().append(Text.literal("You have been removed from ").formatted(Formatting.GOLD)).append(Text.literal(groupData.getName())).withColor(groupData.getColor()), false);
         return 1;
     }
 }
