@@ -37,6 +37,10 @@ public class GroupTransferCommand {
             context.getSource().sendFeedback(() -> Text.literal("You are not currently in a group").formatted(Formatting.DARK_RED), false);
             return 1;
         }
+        if(oldLeader.getUuid().equals(newLeaderUuid)) {
+            context.getSource().sendFeedback(() -> Text.literal("You cannot transfer to yourself").formatted(Formatting.DARK_RED), false);
+            return 1;
+        }
         if (!groupData.isLeader(oldLeader.getUuid())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to delete this group").formatted(Formatting.DARK_RED), false);
             return 1;
