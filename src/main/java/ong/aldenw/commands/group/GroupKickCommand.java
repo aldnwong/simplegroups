@@ -36,6 +36,10 @@ public class GroupKickCommand {
             context.getSource().sendFeedback(() -> Text.literal("You are not currently in a group").formatted(Formatting.DARK_RED), false);
             return 1;
         }
+        if (leader.getUuid().equals(kickedPlayerUuid)) {
+            context.getSource().sendFeedback(() -> Text.literal("You cannot kick yourself").formatted(Formatting.DARK_RED), false);
+            return 1;
+        }
         if (!groupData.isLeader(leader.getUuid())) {
             context.getSource().sendFeedback(() -> Text.literal("You do not have permission to kick members from this group").formatted(Formatting.DARK_RED), false);
             return 1;
